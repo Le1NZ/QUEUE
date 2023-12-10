@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">QUEUE</string>
+    <string name="welcome">Welcome to QUEUE</string>
+    <string name="enter_login">Enter login</string>
+    <string name="enter_name">Enter name</string>
+    <string name="enter_password">Enter password</string>
+    <string name="enter_password_again">Enter password again</string>
+    <string name="sign_up">Sign up</string>
+    <string name="already_have_account">Already have account?</string>
+    <string name="already_havent_account">Already have not account?</string>
+    <string name="sign_in">Sign in</string>
+</resources>
