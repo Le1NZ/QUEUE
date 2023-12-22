@@ -16,4 +16,6 @@
     <string name="field_should_be_not_empty">Поле не должно быть пустым</string>
     <string name="not_all_fields_filled">Не все поля заполнены</string>
     <string name="error">Ошибка</string>
+    <string name="profile">Ваш профиль</string>
+    <string name="log_out">Выйти</string>
 </resources>

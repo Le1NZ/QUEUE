@@ -7,10 +7,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import ru.pokrovskii.queue.ui.screens.HomeScreen
+import ru.pokrovskii.queue.ui.screens.ProfileScreen
 import ru.pokrovskii.queue.ui.screens.Screen
 import ru.pokrovskii.queue.ui.screens.SignInScreen
 import ru.pokrovskii.queue.ui.screens.SignUpScreen
 import ru.pokrovskii.queue.ui.screens.SplashScreen
+import ru.pokrovskii.queue.viewModels.ProfileScreenViewModel
 import ru.pokrovskii.queue.viewModels.SignInScreenViewModel
 import ru.pokrovskii.queue.viewModels.SignUpScreenViewModel
 import ru.pokrovskii.queue.viewModels.SplashScreenViewModel
@@ -60,7 +62,11 @@ object Navigation {
                 route = MAIN_ROUTE
             ) {
                 composable(Screen.MainScreen.name) {
-                    HomeScreen()
+                    HomeScreen(navController)
+                }
+                composable(Screen.ProfileScreen.name) {
+                    val viewModel = hiltViewModel<ProfileScreenViewModel>()
+                    ProfileScreen(navController, viewModel)
                 }
             }
         }

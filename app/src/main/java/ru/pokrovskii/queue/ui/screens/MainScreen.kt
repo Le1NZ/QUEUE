@@ -26,14 +26,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import ru.pokrovskii.queue.R
 import ru.pokrovskii.queue.domain.model.Queue
 
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    navController: NavController
+) {
     val queues = listOf<Queue>()
     Scaffold(
         modifier = Modifier
@@ -46,7 +48,9 @@ fun HomeScreen() {
                     Text(text = stringResource(id = R.string.app_name))
                 },
                 actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = {
+                        navController.navigate(Screen.ProfileScreen.name)
+                    }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_account),
                             contentDescription = "Account button"

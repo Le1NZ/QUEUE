@@ -7,5 +7,6 @@ sealed class Screen(val name: String) {
     object SignUpScreen : Screen("sign_up_screen")
     object AddQueueScreen : Screen("add_queue_screen")
     object SplashScreen : Screen("splash_screen")
+    object ProfileScreen : Screen("profile_screen")
 
 }

@@ -14,4 +14,6 @@
     <string name="field_should_be_not_empty">Field should be not empty</string>
     <string name="not_all_fields_filled">Not all fields filled</string>
     <string name="error">Error</string>
+    <string name="profile">Your profile</string>
+    <string name="log_out">Log out</string>
 </resources>

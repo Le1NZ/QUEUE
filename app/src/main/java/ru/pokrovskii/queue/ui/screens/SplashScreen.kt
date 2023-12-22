@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.pokrovskii.queue.R
 import ru.pokrovskii.queue.core.ResultOfRequest
@@ -30,7 +31,7 @@ fun SplashScreen(
     }
 
     LaunchedEffect(Unit) {
-        launch {
+        launch(Dispatchers.IO) {
             viewModel.starting()
         }
 
