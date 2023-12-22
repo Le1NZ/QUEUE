@@ -1,4 +1,4 @@
-package ru.pokrovskii.queue.data.model
+package ru.pokrovskii.queue.domain.model
 
 data class Queue(
     val name: String,

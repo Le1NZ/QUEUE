@@ -1,5 +1,6 @@
 package ru.pokrovskii.queue.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,23 +18,29 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import ru.pokrovskii.queue.R
+import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.ui.Navigation
 import ru.pokrovskii.queue.viewModels.SignUpScreenViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,11 +48,35 @@ fun SignUpScreen(
     navController: NavController,
     viewModel: SignUpScreenViewModel = viewModel()
 ) {
+    val context = LocalContext.current
 
     val userName by viewModel.userName.collectAsState()
-    val userLogin by viewModel.userLogin.collectAsState()
+    val userEmail by viewModel.userEmail.collectAsState()
     val userPassword by viewModel.userPassword.collectAsState()
     val userPasswordAgain by viewModel.userPasswordAgain.collectAsState()
+
+    var isEmailCorrect by remember {
+        mutableStateOf(false)
+    }
+    var isNameCorrect by remember {
+        mutableStateOf(false)
+    }
+    var isPasswordCorrect by remember {
+        mutableStateOf(false)
+    }
+    var isPasswordsEqual by remember {
+        mutableStateOf(true)
+    }
+    var isShowingProgress by remember {
+        mutableStateOf(false)
+    }
+    var isShowingAlertDialog by remember {
+        mutableStateOf(false)
+    }
+    var errorMessage by remember {
+        mutableStateOf("")
+    }
+
 
     Box(
         modifier = Modifier
@@ -71,20 +102,34 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = userLogin,
-                onValueChange = { viewModel.updateLogin(it) },
+                value = userEmail,
+                isError = !isEmailCorrect,
+                onValueChange = {
+                    viewModel.updateEmail(it)
+                    isEmailCorrect = isEmailCorrect(it)
+                },
                 label = {
-                    Text(stringResource(id = R.string.enter_login))
+                    Text(stringResource(id = R.string.enter_email))
                 }
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = userName,
-
-                onValueChange = { viewModel.updateName(it) },
+                isError = !isNameCorrect,
+                onValueChange = {
+                    viewModel.updateName(it)
+                    isNameCorrect = isNameCorrect(it)
+                },
                 label = {
                     Text(stringResource(id = R.string.enter_name))
+                },
+                supportingText = {
+                    if (!isNameCorrect) {
+                        Text(text = stringResource(id = R.string.field_should_be_not_empty))
+                    } else {
+                        Text("")
+                    }
                 }
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -92,10 +137,22 @@ fun SignUpScreen(
                 modifier = Modifier.fillMaxWidth(),
                 value = userPassword,
                 maxLines = 1,
+                isError = !isPasswordCorrect,
                 visualTransformation = PasswordVisualTransformation(),
-                onValueChange = { viewModel.updatePassword(it) },
+                onValueChange = {
+                    viewModel.updatePassword(it)
+                    isPasswordCorrect = isPasswordCorrect(it)
+                    isPasswordsEqual = it == userPasswordAgain
+                },
                 label = {
                     Text(stringResource(id = R.string.enter_password))
+                },
+                supportingText = {
+                    if (!isPasswordCorrect) {
+                        Text(text = stringResource(id = R.string.password_is_too_easy))
+                    } else {
+                        Text("")
+                    }
                 }
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -103,17 +160,35 @@ fun SignUpScreen(
                 modifier = Modifier.fillMaxWidth(),
                 value = userPasswordAgain,
                 maxLines = 1,
+                isError = !isPasswordsEqual,
                 visualTransformation = PasswordVisualTransformation(),
-                onValueChange = { viewModel.updatePasswordAgain(it) },
+                onValueChange = {
+                    viewModel.updatePasswordAgain(it)
+                    isPasswordsEqual = userPassword == it
+                },
                 label = {
                     Text(stringResource(id = R.string.enter_password_again))
+                },
+                supportingText = {
+                    if (!isPasswordsEqual) {
+                        Text(text = stringResource(id = R.string.passwords_are_not_equal))
+                    } else {
+                        Text("")
+                    }
                 }
             )
             Spacer(modifier = Modifier.height(20.dp))
             FilledTonalButton(
                 onClick = {
-                    navController.navigate(Screen.MainScreen.name) {
-                        popUpTo(Navigation.AUTH_ROUTE)
+                    if (isPasswordsEqual && isEmailCorrect && isPasswordCorrect && isNameCorrect) {
+                        isShowingProgress = true
+                        viewModel.signUpUser()
+                    } else {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.not_all_fields_filled),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 },
                 modifier = Modifier
@@ -140,6 +215,50 @@ fun SignUpScreen(
                 }
             )
         }
+        if (isShowingProgress) {
+            ShowProgressBar {
+                isShowingProgress = false
+            }
+        }
+        if (isShowingAlertDialog) {
+            AlertDialog(
+                onClick = {
+                    isShowingAlertDialog = false
+                },
+                dialogTitle = stringResource(id = R.string.error),
+                dialogText = errorMessage
+            )
+        }
+        LaunchedEffect(viewModel.result) {
+            viewModel.result.collect { result ->
+                isShowingProgress = false
+                when (result) {
+                    is ResultOfRequest.Success -> {
+                        navController.navigate(Navigation.MAIN_ROUTE) {
+                            popUpTo(Navigation.AUTH_ROUTE)
+                        }
+                    }
+                    is ResultOfRequest.Error -> {
+                        isShowingAlertDialog = true
+                        errorMessage = result.errorMessage
+                    }
+                    else -> {}
+                }
+            }
+        }
     }
 }
 
+fun isEmailCorrect(email: String): Boolean {
+    val emailRegex = Regex("^\\S+@\\S+\\.\\S+$")
+    return emailRegex.matches(email)
+}
+
+fun isNameCorrect(name: String): Boolean {
+    return name.isNotEmpty()
+}
+
+fun isPasswordCorrect(password: String): Boolean {
+    val passwordRegex = Regex("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$")
+    return passwordRegex.matches(password)
+}

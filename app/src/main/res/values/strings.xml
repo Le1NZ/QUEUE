@@ -3,7 +3,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
     <string name="welcome">Добро пожаловать в КУЕУЕ</string>
-    <string name="enter_login">Введите логин</string>
+    <string name="enter_email">Введите электронную почту</string>
     <string name="enter_name">Введите имя</string>
     <string name="enter_password">Введите пароль</string>
     <string name="enter_password_again">Введите пароль еще раз</string>
@@ -11,4 +11,9 @@
     <string name="already_have_account">Уже есть аккаунт?</string>
     <string name="already_havent_account">Еще нет аккаунта?</string>
     <string name="sign_in">Войти</string>
+    <string name="passwords_are_not_equal">Пароли не совпадают</string>
+    <string name="password_is_too_easy">Пароль слишком легкий</string>
+    <string name="field_should_be_not_empty">Поле не должно быть пустым</string>
+    <string name="not_all_fields_filled">Не все поля заполнены</string>
+    <string name="error">Ошибка</string>
 </resources>

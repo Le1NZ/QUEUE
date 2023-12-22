@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">QUEUE</string>
     <string name="welcome">Welcome to QUEUE</string>
-    <string name="enter_login">Enter login</string>
+    <string name="enter_email">Enter email</string>
     <string name="enter_name">Enter name</string>
     <string name="enter_password">Enter password</string>
     <string name="enter_password_again">Enter password again</string>
@@ -9,4 +9,9 @@
     <string name="already_have_account">Already have account?</string>
     <string name="already_havent_account">Already have not account?</string>
     <string name="sign_in">Sign in</string>
+    <string name="passwords_are_not_equal">Passwords are not equal</string>
+    <string name="password_is_too_easy">Password is too easy</string>
+    <string name="field_should_be_not_empty">Field should be not empty</string>
+    <string name="not_all_fields_filled">Not all fields filled</string>
+    <string name="error">Error</string>
 </resources>
