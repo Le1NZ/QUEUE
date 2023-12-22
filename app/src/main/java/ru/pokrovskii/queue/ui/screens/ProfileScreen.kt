@@ -32,8 +32,10 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.pokrovskii.queue.R
+import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.domain.model.User
 import ru.pokrovskii.queue.viewModels.ProfileScreenViewModel
+import ru.pokrovskii.queue.ui.Navigation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,8 +47,15 @@ fun ProfileScreen(
     var isShowingProgress by remember {
         mutableStateOf(true)
     }
+    var isShowingAlertDialog by remember {
+        mutableStateOf(false)
+    }
     var currUser: User? by remember {
         mutableStateOf(null)
+    }
+
+    var errorMessage by remember {
+        mutableStateOf("")
     }
 
     Scaffold(
@@ -101,7 +110,10 @@ fun ProfileScreen(
                 verticalAlignment = Alignment.Bottom
             ) {
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        viewModel.logOut()
+                        isShowingProgress = true
+                    },
                     modifier = Modifier.fillMaxWidth(),
 
                     ) {
@@ -116,6 +128,16 @@ fun ProfileScreen(
             }
         }
 
+        if (isShowingAlertDialog) {
+            AlertDialog(
+                onClick = {
+                    isShowingAlertDialog = false
+                },
+                dialogTitle = stringResource(id = R.string.error),
+                dialogText = errorMessage
+            )
+        }
+
         LaunchedEffect(viewModel.user) {
             launch(Dispatchers.IO) {
                 viewModel.getUser()
@@ -123,6 +145,24 @@ fun ProfileScreen(
             viewModel.user.collect { user ->
                 isShowingProgress = false
                 currUser = user
+            }
+        }
+
+        LaunchedEffect(viewModel.resultOfLogOut) {
+            viewModel.resultOfLogOut.collect { result ->
+                isShowingProgress = false
+                when (result) {
+                    is ResultOfRequest.Error -> {
+                        errorMessage = result.errorMessage
+                        isShowingAlertDialog = true
+                    }
+                    is ResultOfRequest.Success -> {
+                        navController.navigate(Navigation.AUTH_ROUTE) {
+                            popUpTo(Navigation.MAIN_ROUTE)
+                        }
+                    }
+                    else -> {}
+                }
             }
         }
     }

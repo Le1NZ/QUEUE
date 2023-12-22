@@ -45,7 +45,8 @@ class SignInScreenViewModel @Inject constructor(
                 if (userResponse.isSuccessful) {
                     val currUser = User(
                         _userName.value,
-                        _userPassword.value
+                        _userPassword.value,
+                        response.body()!!.sessionToken
                     )
                     userDao.addUser(currUser)
                     _result.value = ResultOfRequest.Success()

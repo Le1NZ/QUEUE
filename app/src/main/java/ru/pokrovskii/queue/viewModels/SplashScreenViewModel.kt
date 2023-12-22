@@ -29,7 +29,10 @@ class SplashScreenViewModel @Inject constructor(
                 _result.value = ResultOfRequest.Error("no_account")
             } else {
                 // Checking info about user on server
-                if (checkInfoOnServer(currUser)) {
+                val response = userApi.signIn(currUser.username, currUser.password)
+                if (response.isSuccessful) {
+                    val newUser = User(currUser.username, currUser.password, response.body()!!.sessionToken)
+                    userDao.updateUser(newUser)
                     _result.value = ResultOfRequest.Success()
                 } else {
                     _result.value = ResultOfRequest.Error("error_from_server")
@@ -38,8 +41,4 @@ class SplashScreenViewModel @Inject constructor(
         }
     }
 
-    suspend fun checkInfoOnServer(currUser: User): Boolean {
-        val response = userApi.signIn(currUser.username, currUser.password)
-        return response.isSuccessful
-    }
 }
