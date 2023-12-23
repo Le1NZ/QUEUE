@@ -1,4 +1,4 @@
-package ru.pokrovskii.queue.ui.screens
+package ru.pokrovskii.queue.ui.screens.logIn
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.OutlinedTextField
@@ -41,6 +40,9 @@ import androidx.navigation.NavController
 import ru.pokrovskii.queue.R
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.ui.Navigation
+import ru.pokrovskii.queue.ui.screens.AlertDialog
+import ru.pokrovskii.queue.ui.screens.Screen
+import ru.pokrovskii.queue.ui.screens.ShowProgressBar
 import ru.pokrovskii.queue.viewModels.SignInScreenViewModel
 
 

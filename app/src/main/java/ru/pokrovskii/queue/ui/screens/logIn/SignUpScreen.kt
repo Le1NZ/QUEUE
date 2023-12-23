@@ -1,4 +1,4 @@
-package ru.pokrovskii.queue.ui.screens
+package ru.pokrovskii.queue.ui.screens.logIn
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -40,6 +40,9 @@ import androidx.navigation.NavController
 import ru.pokrovskii.queue.R
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.ui.Navigation
+import ru.pokrovskii.queue.ui.screens.AlertDialog
+import ru.pokrovskii.queue.ui.screens.Screen
+import ru.pokrovskii.queue.ui.screens.ShowProgressBar
 import ru.pokrovskii.queue.viewModels.SignUpScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

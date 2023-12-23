@@ -6,13 +6,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import ru.pokrovskii.queue.ui.screens.HomeScreen
-import ru.pokrovskii.queue.ui.screens.ProfileScreen
 import ru.pokrovskii.queue.ui.screens.Screen
-import ru.pokrovskii.queue.ui.screens.SignInScreen
-import ru.pokrovskii.queue.ui.screens.SignUpScreen
 import ru.pokrovskii.queue.ui.screens.SplashScreen
+import ru.pokrovskii.queue.ui.screens.logIn.SignInScreen
+import ru.pokrovskii.queue.ui.screens.logIn.SignUpScreen
+import ru.pokrovskii.queue.ui.screens.main.HomeScreen
+import ru.pokrovskii.queue.ui.screens.main.ProfileScreen
+import ru.pokrovskii.queue.ui.screens.main.SettingsScreen
 import ru.pokrovskii.queue.viewModels.ProfileScreenViewModel
+import ru.pokrovskii.queue.viewModels.SettingsScreenViewModel
 import ru.pokrovskii.queue.viewModels.SignInScreenViewModel
 import ru.pokrovskii.queue.viewModels.SignUpScreenViewModel
 import ru.pokrovskii.queue.viewModels.SplashScreenViewModel
@@ -67,6 +69,10 @@ object Navigation {
                 composable(Screen.ProfileScreen.name) {
                     val viewModel = hiltViewModel<ProfileScreenViewModel>()
                     ProfileScreen(navController, viewModel)
+                }
+                composable(Screen.SettingsScreen.name) {
+                    val viewModel = hiltViewModel<SettingsScreenViewModel>()
+                    SettingsScreen(navController, viewModel)
                 }
             }
         }

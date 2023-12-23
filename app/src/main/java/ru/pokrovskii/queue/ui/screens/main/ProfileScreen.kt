@@ -1,4 +1,4 @@
-package ru.pokrovskii.queue.ui.screens
+package ru.pokrovskii.queue.ui.screens.main
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +36,9 @@ import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.domain.model.User
 import ru.pokrovskii.queue.viewModels.ProfileScreenViewModel
 import ru.pokrovskii.queue.ui.Navigation
+import ru.pokrovskii.queue.ui.screens.AlertDialog
+import ru.pokrovskii.queue.ui.screens.Screen
+import ru.pokrovskii.queue.ui.screens.ShowProgressBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,7 +82,9 @@ fun ProfileScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = {
+                        navController.navigate(Screen.SettingsScreen.name)
+                    }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_settings),
                             contentDescription = "Settings"

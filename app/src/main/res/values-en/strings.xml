@@ -16,4 +16,7 @@
     <string name="error">Error</string>
     <string name="profile">Your profile</string>
     <string name="log_out">Log out</string>
+    <string name="settings">Settings</string>
+    <string name="your_username">Your username</string>
+    <string name="success_update_username">Name updated successful</string>
 </resources>

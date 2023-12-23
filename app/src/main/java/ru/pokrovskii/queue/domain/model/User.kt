@@ -5,8 +5,9 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class User(
-    @PrimaryKey
     val username: String,
     val password: String,
-    var sessionToken: String
+    var sessionToken: String,
+    @PrimaryKey
+    var objectId: String
 )

@@ -56,10 +56,11 @@ class SignUpScreenViewModel @Inject constructor(
 
     fun signUpUser() {
         viewModelScope.launch(Dispatchers.IO) {
-            val currUser = User(_userName.value, _userPassword.value, "")
+            val currUser = User(_userName.value, _userPassword.value, "", "")
             val resultOfResponse = userApi.signUp(currUser)
             if (resultOfResponse.isSuccessful) {
                 currUser.sessionToken = resultOfResponse.body()!!.sessionToken
+                currUser.objectId = resultOfResponse.body()!!.objectId
                 userDao.addUser(currUser)
                 _result.value = ResultOfRequest.Success()
             } else {

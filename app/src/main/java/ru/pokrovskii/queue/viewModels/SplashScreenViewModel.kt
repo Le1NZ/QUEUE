@@ -31,7 +31,12 @@ class SplashScreenViewModel @Inject constructor(
                 // Checking info about user on server
                 val response = userApi.signIn(currUser.username, currUser.password)
                 if (response.isSuccessful) {
-                    val newUser = User(currUser.username, currUser.password, response.body()!!.sessionToken)
+                    val newUser = User(
+                        currUser.username,
+                        currUser.password,
+                        response.body()!!.sessionToken,
+                        response.body()!!.objectId
+                    )
                     userDao.updateUser(newUser)
                     _result.value = ResultOfRequest.Success()
                 } else {
