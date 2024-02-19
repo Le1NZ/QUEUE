@@ -2,6 +2,8 @@ package ru.pokrovskii.queue.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,34 +16,23 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SplashScreenViewModel @Inject constructor(
+    private val auth: FirebaseAuth,
     private val userApi: UserApi,
     private val userDao: UserDAO
 ) : ViewModel() {
 
-    private val _result: MutableStateFlow<ResultOfRequest?> = MutableStateFlow(null)
-    val result: StateFlow<ResultOfRequest?> = _result
+    private val _result: MutableStateFlow<ResultOfRequest<FirebaseUser?>?> = MutableStateFlow(null)
+    val result: StateFlow<ResultOfRequest<FirebaseUser?>?> = _result
 
     fun starting() {
         viewModelScope.launch {
             // Checking user in DB
-            val currUser = userDao.getCurrUser()
-            if (currUser == null) {
-                _result.value = ResultOfRequest.Error("no_account")
+            //val currUser = userDao.getCurrUser()
+            // If no user in DB we navigating screen to signUp
+            if (auth.currentUser != null) {
+                _result.value = ResultOfRequest.Success(auth.currentUser)
             } else {
-                // Checking info about user on server
-                val response = userApi.signIn(currUser.username, currUser.password)
-                if (response.isSuccessful) {
-                    val newUser = User(
-                        currUser.username,
-                        currUser.password,
-                        response.body()!!.sessionToken,
-                        response.body()!!.objectId
-                    )
-                    userDao.updateUser(newUser)
-                    _result.value = ResultOfRequest.Success()
-                } else {
-                    _result.value = ResultOfRequest.Error("error_from_server")
-                }
+                _result.value = ResultOfRequest.Error("no sign in")
             }
         }
     }

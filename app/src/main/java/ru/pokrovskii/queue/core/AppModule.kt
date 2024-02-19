@@ -2,6 +2,11 @@ package ru.pokrovskii.queue.core
 
 import android.app.Application
 import androidx.room.Room
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,14 +35,25 @@ class AppModule {
     @Provides
     @Singleton
     fun provideUserApi(): UserApi {
-        return Retrofit.Builder().baseUrl(UserApi.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create()).build().create(UserApi::class.java)
+        return UserApi(provideFirebaseAuth(), provideDataBase())
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth(): FirebaseAuth {
+        return Firebase.auth
     }
 
     @Provides
     @Singleton
     fun provideUserDao(userDataBase: UserDataBase): UserDAO {
         return userDataBase.userDAO
+    }
+
+    @Provides
+    @Singleton
+    fun provideDataBase(): FirebaseFirestore {
+        return Firebase.firestore
     }
 
 }

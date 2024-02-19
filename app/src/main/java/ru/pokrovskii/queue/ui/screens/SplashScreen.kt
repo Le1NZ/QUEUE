@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.pokrovskii.queue.R
@@ -31,21 +32,27 @@ fun SplashScreen(
     }
 
     LaunchedEffect(Unit) {
-        launch(Dispatchers.IO) {
+        launch {
             viewModel.starting()
         }
 
-        scale.animateTo(
-            targetValue = 0.7f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioHighBouncy,
-                stiffness = Spring.StiffnessVeryLow
-            )
-        )
+        launch {
+            val job = launch {
+                scale.animateTo(
+                    targetValue = 0.7f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioHighBouncy,
+                        stiffness = Spring.StiffnessVeryLow
+                    )
+                )
+            }
 
-        viewModel.result.collect { result ->
-            navigationToNextScreen(result, navController)
+            job.join()
+            viewModel.result.collect { result ->
+                navigationToNextScreen(result, navController)
+            }
         }
+
 
     }
 
@@ -61,7 +68,7 @@ fun SplashScreen(
     }
 }
 
-fun navigationToNextScreen(result: ResultOfRequest?, navController: NavController) {
+fun navigationToNextScreen(result: ResultOfRequest<FirebaseUser?>?, navController: NavController) {
     when (result) {
         is ResultOfRequest.Error -> {
             navController.navigate(Navigation.AUTH_ROUTE) {

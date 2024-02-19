@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
     kotlin("kapt")
 }
 
@@ -53,16 +54,13 @@ android {
 
 dependencies {
     implementation("androidx.interpolator:interpolator:1.0.0")
-    val navVersion = "2.7.6"
+    val navVersion = "2.7.7"
 
     // Navigation component
     implementation("androidx.navigation:navigation-compose:$navVersion")
 
     // viewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-
-    // back4app
-    implementation("com.github.parse-community.Parse-SDK-Android:parse:1.26.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
 
     //ROOM
     val roomVersion = "2.6.1"
@@ -87,8 +85,18 @@ dependencies {
     kapt("androidx.hilt:hilt-compiler:1.1.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 
+    //FIREBASE
+    implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
+    implementation("com.google.firebase:firebase-analytics")
+
+    //FIREBASE AUTH
+    implementation("com.google.firebase:firebase-auth")
+
+    //FIREBASE FIRESTORE
+    implementation("com.google.firebase:firebase-firestore")
+
     implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
     implementation("androidx.compose.ui:ui")

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "15114502338",
+    "project_id": "queue-257c3",
+    "storage_bucket": "queue-257c3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:15114502338:android:3593f00cf785440e80fb5b",
+        "android_client_info": {
+          "package_name": "ru.pokrovskii.queue"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8ebg28AIXSBiqosJ18rZDUsreJMuq3qA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

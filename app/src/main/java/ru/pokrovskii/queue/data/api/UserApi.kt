@@ -1,77 +1,89 @@
 package ru.pokrovskii.queue.data.api
 
-import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Headers
-import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.Path
-import retrofit2.http.Query
-import ru.pokrovskii.queue.core.Constants
-import ru.pokrovskii.queue.data.dto.SignInDTO
-import ru.pokrovskii.queue.data.dto.SignUpDTO
-import ru.pokrovskii.queue.data.dto.UpdateUserDTO
-import ru.pokrovskii.queue.data.dto.UserDTO
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.toObject
+import kotlinx.coroutines.tasks.asDeferred
+import kotlinx.coroutines.tasks.await
+import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.domain.model.User
+import javax.inject.Inject
 
-interface UserApi {
+class UserApi @Inject constructor(
+    private val auth: FirebaseAuth,
+    private val database: FirebaseFirestore
+) {
 
     companion object {
-        const val BASE_URL = "https://parseapi.back4app.com"
+        private const val USERS_COLLECTION = "users"
     }
 
-    @Headers(
-        "X-Parse-Application-Id: ${Constants.applicationId}",
-        "X-Parse-REST-API-Key: ${Constants.restApiKey}",
-        "X-Parse-Revocable-Session: 1",
-        "Content-Type: application/json"
-    )
-    @POST("/users")
-    suspend fun signUp(
-        @Body user: User
-    ): Response<SignUpDTO>
 
-    @Headers(
-        "X-Parse-Application-Id: ${Constants.applicationId}",
-        "X-Parse-REST-API-Key: ${Constants.restApiKey}",
-        "X-Parse-Revocable-Session: 1"
-    )
-    @GET("/login")
-    suspend fun signIn(
-        @Query("username") username: String,
-        @Query("password") password: String
-    ): Response<SignInDTO>
+    suspend fun signUp(email: String, password: String): ResultOfRequest<FirebaseUser> {
+        var resultOfRequest: ResultOfRequest<FirebaseUser> = ResultOfRequest.Loading
+        resultOfRequest = try {
+            auth.createUserWithEmailAndPassword(email, password).await()
+            ResultOfRequest.Success(auth.currentUser!!)
+        } catch (e: Exception) {
+            ResultOfRequest.Error(e.message!!)
+        }
 
-    @Headers(
-        "X-Parse-Application-Id: ${Constants.applicationId}",
-        "X-Parse-REST-API-Key: ${Constants.restApiKey}"
-    )
-    @GET("/users/{objectId}")
-    suspend fun getUser(
-        @Path("objectId") objectId: String
-    ): Response<UserDTO>
+        return resultOfRequest
+    }
 
-    @Headers(
-        "X-Parse-Application-Id: ${Constants.applicationId}",
-        "X-Parse-REST-API-Key: ${Constants.restApiKey}"
-    )
-    @POST("/logout")
-    suspend fun logOut(
-        @Header("X-Parse-Session-Token") sessionToken: String
-    ): Response<Unit>
+    suspend fun signIn(email: String, password: String): ResultOfRequest<FirebaseUser> {
+        var resultOfRequest: ResultOfRequest<FirebaseUser> = ResultOfRequest.Loading
+        resultOfRequest = try {
+            auth.signInWithEmailAndPassword(email, password).await()
+            ResultOfRequest.Success(auth.currentUser!!)
+        } catch (e: Exception) {
+            ResultOfRequest.Error(e.message!!)
+        }
 
-    @Headers(
-        "X-Parse-Application-Id: ${Constants.applicationId}",
-        "X-Parse-REST-API-Key: ${Constants.restApiKey}",
-        "Content-Type: application/json"
-    )
-    @PUT("/users/{objectId}")
-    suspend fun updateUser(
-        @Header("X-Parse-Session-Token") sessionToken: String,
-        @Path("objectId") objectId: String,
-        @Body user: User
-    ): Response<UpdateUserDTO>
+        return resultOfRequest
+    }
+
+    suspend fun logOut(): ResultOfRequest<Unit> {
+        auth.signOut()
+        return ResultOfRequest.Success(Unit)
+    }
+
+    suspend fun setUser(user: User, userId: String): ResultOfRequest<Unit?> {
+        var resultOfRequest: ResultOfRequest<Unit?> = ResultOfRequest.Loading
+        try {
+            database
+                .collection(USERS_COLLECTION)
+                .document(userId)
+                .set(user, SetOptions.merge())
+                .await()
+            resultOfRequest = ResultOfRequest.Success(Unit)
+        } catch (e: Exception) {
+            resultOfRequest = ResultOfRequest.Error(e.message!!)
+        }
+
+        return resultOfRequest
+    }
+
+    suspend fun getUser(userId: String): ResultOfRequest<User?> {
+        var resultOfRequest: ResultOfRequest<User?> = ResultOfRequest.Loading
+        try {
+            val result = database
+                .collection(USERS_COLLECTION)
+                .document(userId)
+                .get()
+                .await()
+            if (result.exists()) {
+                resultOfRequest = ResultOfRequest.Success(result.toObject<User>())
+            } else {
+                resultOfRequest = ResultOfRequest.Error("The object is not exist")
+            }
+        } catch (e: Exception) {
+            resultOfRequest = ResultOfRequest.Error(e.message!!)
+        }
+
+        return resultOfRequest
+    }
 
 }

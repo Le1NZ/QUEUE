@@ -2,9 +2,12 @@ package ru.pokrovskii.queue.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.data.api.UserApi
@@ -15,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsScreenViewModel @Inject constructor(
     private val userDao: UserDAO,
-    private val userApi: UserApi
+    private val userApi: UserApi,
+    private val auth: FirebaseAuth
 ) : ViewModel() {
 
     private val _newUserName: MutableStateFlow<String> = MutableStateFlow("")
@@ -23,8 +27,9 @@ class SettingsScreenViewModel @Inject constructor(
 
     private val _currUser: MutableStateFlow<User?> = MutableStateFlow(null)
 
-    private val _resultOfUpdateUserName: MutableStateFlow<ResultOfRequest?> = MutableStateFlow(null)
-    val resultOfUpdateUserName : StateFlow<ResultOfRequest?> = _resultOfUpdateUserName
+    private val _resultOfUpdateUserName: MutableStateFlow<ResultOfRequest<Unit?>?> =
+        MutableStateFlow(null)
+    val resultOfUpdateUserName: StateFlow<ResultOfRequest<Unit?>?> = _resultOfUpdateUserName
 
     fun updateUserName(name: String) {
         _newUserName.value = name
@@ -38,36 +43,20 @@ class SettingsScreenViewModel @Inject constructor(
     }
 
     fun updateUserName() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val newUser = User(
-                _newUserName.value,
-                _currUser.value!!.password,
-                _currUser.value!!.sessionToken,
-                _currUser.value!!.objectId
+                username = _newUserName.value
             )
-            val response = userApi.updateUser(
-                _currUser.value!!.sessionToken,
-                _currUser.value!!.objectId,
-                newUser
-            )
-            if (response.isSuccessful) {
-                val responseSignIn = userApi.signIn(newUser.username, newUser.password)
-                if (responseSignIn.isSuccessful) {
-                    newUser.sessionToken = responseSignIn.body()!!.sessionToken
+
+
+            val resultOfRequest = userApi.setUser(newUser, auth.currentUser!!.uid)
+            _resultOfUpdateUserName.update { null }
+            if (resultOfRequest is ResultOfRequest.Success) {
+                launch {
                     userDao.updateUser(newUser)
-                    _currUser.value = newUser
-                    _resultOfUpdateUserName.value = ResultOfRequest.Success()
-                } else {
-                    _resultOfUpdateUserName.value = ResultOfRequest.Error(
-                        responseSignIn.errorBody()!!.string()
-                    )
                 }
-            } else {
-                _resultOfUpdateUserName.value = ResultOfRequest.Error(
-                    response.errorBody()!!.string()
-                )
             }
+            _resultOfUpdateUserName.update { resultOfRequest }
         }
     }
-
 }

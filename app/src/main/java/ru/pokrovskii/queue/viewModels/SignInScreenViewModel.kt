@@ -2,11 +2,13 @@ package ru.pokrovskii.queue.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.data.api.UserApi
@@ -20,17 +22,17 @@ class SignInScreenViewModel @Inject constructor(
     private val userDao: UserDAO
 ) : ViewModel() {
 
-    private val _userName = MutableStateFlow("")
-    val userName = _userName.asStateFlow()
+    private val _userEmail = MutableStateFlow("")
+    val userName = _userEmail.asStateFlow()
 
     private val _userPassword = MutableStateFlow("")
     val userPassword = _userPassword.asStateFlow()
 
-    private val _result: MutableStateFlow<ResultOfRequest?> = MutableStateFlow(null)
-    val result: StateFlow<ResultOfRequest?> = _result
+    private val _result: MutableStateFlow<ResultOfRequest<FirebaseUser>?> = MutableStateFlow(null)
+    val result: StateFlow<ResultOfRequest<FirebaseUser>?> = _result
 
     fun updateEmail(name: String) {
-        _userName.value = name
+        _userEmail.value = name
     }
 
     fun updatePassword(password: String) {
@@ -39,23 +41,16 @@ class SignInScreenViewModel @Inject constructor(
 
     fun signIn() {
         viewModelScope.launch(Dispatchers.IO) {
-            val response = userApi.signIn(_userName.value, _userPassword.value)
-            if (response.isSuccessful) {
-                val userResponse = userApi.getUser(response.body()!!.objectId)
-                if (userResponse.isSuccessful) {
-                    val currUser = User(
-                        _userName.value,
-                        _userPassword.value,
-                        response.body()!!.sessionToken,
-                        response.body()!!.objectId
-                    )
-                    userDao.addUser(currUser)
-                    _result.value = ResultOfRequest.Success()
-                } else {
-                    _result.value = ResultOfRequest.Error(response.errorBody()!!.string())
+            val resultOfRequest = userApi.signIn(_userEmail.value, _userPassword.value)
+
+            if (resultOfRequest is ResultOfRequest.Success) {
+                val resultOfRequestOfUserData = userApi.getUser(resultOfRequest.result.uid)
+                if (resultOfRequestOfUserData is ResultOfRequest.Success) {
+                    userDao.addUser(resultOfRequestOfUserData.result!!)
+                    _result.update { resultOfRequest }
+                } else if (resultOfRequestOfUserData is ResultOfRequest.Error) {
+                    _result.update { ResultOfRequest.Error(resultOfRequestOfUserData.errorMessage) }
                 }
-            } else {
-                _result.value = ResultOfRequest.Error(response.errorBody()!!.string())
             }
         }
     }

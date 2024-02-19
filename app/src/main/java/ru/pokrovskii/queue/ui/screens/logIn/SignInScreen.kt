@@ -104,7 +104,7 @@ fun SignInScreen(
                     isEmailCorrect = it.isNotEmpty()
                 },
                 label = {
-                    Text(stringResource(id = R.string.enter_name))
+                    Text(stringResource(id = R.string.enter_email))
                 },
                 supportingText = {
                     if (isEmailCorrect) {
