@@ -83,11 +83,6 @@ fun SignUpScreen(
 
     Box(
         modifier = Modifier
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(Color.LightGray, Color.Cyan)
-                )
-            )
             .fillMaxSize()
             .padding(16.dp)
     ) {
@@ -106,6 +101,7 @@ fun SignUpScreen(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = userEmail,
+                maxLines = 1,
                 isError = !isEmailCorrect,
                 onValueChange = {
                     viewModel.updateEmail(it)
@@ -120,6 +116,7 @@ fun SignUpScreen(
                 modifier = Modifier.fillMaxWidth(),
                 value = userName,
                 isError = !isNameCorrect,
+                maxLines = 1,
                 onValueChange = {
                     viewModel.updateName(it)
                     isNameCorrect = isNameCorrect(it)

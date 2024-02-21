@@ -2,12 +2,16 @@ package ru.pokrovskii.queue.data.api
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.tasks.asDeferred
 import kotlinx.coroutines.tasks.await
 import ru.pokrovskii.queue.core.ResultOfRequest
+import ru.pokrovskii.queue.domain.DTO.QueueDTO
+import ru.pokrovskii.queue.domain.DTO.UserDTO
+import ru.pokrovskii.queue.domain.model.Queue
 import ru.pokrovskii.queue.domain.model.User
 import javax.inject.Inject
 
@@ -79,6 +83,41 @@ class UserApi @Inject constructor(
             } else {
                 resultOfRequest = ResultOfRequest.Error("The object is not exist")
             }
+        } catch (e: Exception) {
+            resultOfRequest = ResultOfRequest.Error(e.message!!)
+        }
+
+        return resultOfRequest
+    }
+
+    suspend fun updateQueuesOfCurrUser(queues: MutableList<QueueDTO>): ResultOfRequest<Unit> {
+        var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
+        try {
+            database
+                .collection(USERS_COLLECTION)
+                .document(auth.currentUser!!.uid)
+                .update("queues", queues)
+                .await()
+
+            resultOfRequest = ResultOfRequest.Success(Unit)
+        } catch (e: Exception) {
+            resultOfRequest = ResultOfRequest.Error(e.message!!)
+        }
+
+        return resultOfRequest
+    }
+
+    suspend fun deleteQueueFromUser(queue: QueueDTO): ResultOfRequest<Unit> {
+        var resultOfRequest : ResultOfRequest<Unit> = ResultOfRequest.Loading
+
+        try {
+            database
+                .collection(USERS_COLLECTION)
+                .document(auth.currentUser!!.uid)
+                .update("queues", FieldValue.arrayRemove(queue))
+                .await()
+
+            resultOfRequest = ResultOfRequest.Success(Unit)
         } catch (e: Exception) {
             resultOfRequest = ResultOfRequest.Error(e.message!!)
         }

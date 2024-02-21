@@ -1,7 +1,7 @@
 package ru.pokrovskii.queue.ui.screens.main
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,33 +19,62 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import ru.pokrovskii.queue.R
-import ru.pokrovskii.queue.domain.model.Queue
+import ru.pokrovskii.queue.core.ResultOfRequest
+import ru.pokrovskii.queue.domain.DTO.QueueDTO
 import ru.pokrovskii.queue.ui.screens.Screen
+import ru.pokrovskii.queue.ui.screens.ShowProgressBar
+import ru.pokrovskii.queue.viewModels.MainScreenViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: MainScreenViewModel,
 ) {
-    val queues = listOf<Queue>()
+    var queues by remember {
+        mutableStateOf(listOf<QueueDTO>())
+    }
+
+    var isShowingProgress by remember {
+        mutableStateOf(true)
+    }
+
+    var isShowingAlertDialog by remember {
+        mutableStateOf(false)
+    }
+
+
+    var errorMessage by remember {
+        mutableStateOf("")
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
 
         topBar = {
             CenterAlignedTopAppBar(
-                modifier = Modifier.padding(16.dp),
                 title = {
-                    Text(text = stringResource(id = R.string.app_name))
+                    Text(
+                        text = stringResource(id = R.string.app_name),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 28.sp
+                    )
                 },
                 actions = {
                     IconButton(onClick = {
@@ -59,41 +88,76 @@ fun HomeScreen(
                 })
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { /*TODO*/ }) {
+            FloatingActionButton(onClick = {
+                navController.navigate(Screen.AddQueueScreen.name)
+            }) {
                 Icon(Icons.Filled.Add, "Floating action button")
             }
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(16.dp)
-        ) {
-            items(queues) { queue ->
-                QueueCard(queue = queue)
+
+        if (queues.isEmpty()) {
+            Text(text = stringResource(id = R.string.no_queues))
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(queues) { queue ->
+                    QueueCard(queue, navController)
+                }
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            viewModel.starting(false)
+        }
+
+        LaunchedEffect(viewModel.resultOfStarting) {
+            viewModel.resultOfStarting.collect { result ->
+                when (result) {
+                    is ResultOfRequest.Success -> {
+                        isShowingProgress = false
+                        queues = result.result
+                    }
+
+                    is ResultOfRequest.Error -> {
+                        isShowingProgress = false
+                        errorMessage = result.errorMessage
+                        isShowingAlertDialog = true
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+        if (isShowingProgress) {
+            ShowProgressBar {
+                isShowingProgress = false
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QueueCard(queue: Queue) {
+private fun QueueCard(queue: QueueDTO, navController: NavController) {
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp),
+            .padding(vertical = 2.dp),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = queue.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Text(text = queue.currPosition.toString(), fontSize = 20.sp)
+            defaultElevation = 2.dp
+        ),
+        onClick = {
+            navController.navigate(Screen.QueueScreen.name + "/${queue.id}")
         }
+    ) {
+        Text(
+            text = queue.name, fontSize = 20.sp, fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

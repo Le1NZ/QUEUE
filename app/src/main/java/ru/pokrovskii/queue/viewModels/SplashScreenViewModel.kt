@@ -11,14 +11,13 @@ import kotlinx.coroutines.launch
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.data.api.UserApi
 import ru.pokrovskii.queue.data.dataBase.UserDAO
-import ru.pokrovskii.queue.domain.model.User
 import javax.inject.Inject
 
 @HiltViewModel
 class SplashScreenViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val userApi: UserApi,
-    private val userDao: UserDAO
+    private val userDao: UserDAO,
 ) : ViewModel() {
 
     private val _result: MutableStateFlow<ResultOfRequest<FirebaseUser?>?> = MutableStateFlow(null)
@@ -26,11 +25,16 @@ class SplashScreenViewModel @Inject constructor(
 
     fun starting() {
         viewModelScope.launch {
-            // Checking user in DB
-            //val currUser = userDao.getCurrUser()
-            // If no user in DB we navigating screen to signUp
             if (auth.currentUser != null) {
-                _result.value = ResultOfRequest.Success(auth.currentUser)
+                val resultOfRequest = userApi.getUser(auth.currentUser!!.uid)
+                if (resultOfRequest is ResultOfRequest.Success) {
+                    launch {
+                        userDao.updateUser(resultOfRequest.result!!)
+                    }
+                    _result.value = ResultOfRequest.Success(auth.currentUser)
+                } else if (resultOfRequest is ResultOfRequest.Error) {
+                    _result.value = ResultOfRequest.Error(resultOfRequest.errorMessage)
+                }
             } else {
                 _result.value = ResultOfRequest.Error("no sign in")
             }

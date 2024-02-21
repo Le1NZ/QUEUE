@@ -75,11 +75,6 @@ fun SignInScreen(
 
     Box(
         modifier = Modifier
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(Color.LightGray, Color.Cyan)
-                )
-            )
             .fillMaxSize()
             .padding(16.dp)
     ) {
@@ -99,6 +94,7 @@ fun SignInScreen(
                 modifier = Modifier.fillMaxWidth(),
                 value = userEmail,
                 isError = !isEmailCorrect,
+                maxLines = 1,
                 onValueChange = {
                     viewModel.updateEmail(it)
                     isEmailCorrect = it.isNotEmpty()

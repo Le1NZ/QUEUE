@@ -11,9 +11,10 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import ru.pokrovskii.queue.data.api.QueueApi
 import ru.pokrovskii.queue.data.api.UserApi
+import ru.pokrovskii.queue.data.dataBase.QueueDAO
+import ru.pokrovskii.queue.data.dataBase.QueueDataBase
 import ru.pokrovskii.queue.data.dataBase.UserDAO
 import ru.pokrovskii.queue.data.dataBase.UserDataBase
 import javax.inject.Singleton
@@ -54,6 +55,28 @@ class AppModule {
     @Singleton
     fun provideDataBase(): FirebaseFirestore {
         return Firebase.firestore
+    }
+
+    @Provides
+    @Singleton
+    fun provideQueueDataBase(app: Application): QueueDataBase {
+        return Room.databaseBuilder(
+            app,
+            QueueDataBase::class.java,
+            QueueDataBase.DATABASE_NAME
+        ).build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideQueueDao(queueDataBase: QueueDataBase): QueueDAO {
+        return queueDataBase.queueDAO
+    }
+
+    @Provides
+    @Singleton
+    fun provideQueueApi(): QueueApi {
+        return QueueApi(provideFirebaseAuth(), provideDataBase())
     }
 
 }

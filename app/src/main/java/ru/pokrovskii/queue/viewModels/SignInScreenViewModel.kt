@@ -51,6 +51,8 @@ class SignInScreenViewModel @Inject constructor(
                 } else if (resultOfRequestOfUserData is ResultOfRequest.Error) {
                     _result.update { ResultOfRequest.Error(resultOfRequestOfUserData.errorMessage) }
                 }
+            } else {
+                _result.update { resultOfRequest }
             }
         }
     }

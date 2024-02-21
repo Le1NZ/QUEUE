@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,11 +35,11 @@ import kotlinx.coroutines.launch
 import ru.pokrovskii.queue.R
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.domain.model.User
-import ru.pokrovskii.queue.viewModels.ProfileScreenViewModel
 import ru.pokrovskii.queue.ui.Navigation
 import ru.pokrovskii.queue.ui.screens.AlertDialog
 import ru.pokrovskii.queue.ui.screens.Screen
 import ru.pokrovskii.queue.ui.screens.ShowProgressBar
+import ru.pokrovskii.queue.viewModels.ProfileScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,7 +68,6 @@ fun ProfileScreen(
 
         topBar = {
             CenterAlignedTopAppBar(
-                modifier = Modifier.padding(16.dp),
                 title = {
                     Text(text = stringResource(id = R.string.profile))
                 },
@@ -125,50 +125,55 @@ fun ProfileScreen(
                     Text(text = stringResource(id = R.string.log_out), fontSize = 16.sp)
                 }
             }
-        }
 
-        if (isShowingProgress) {
-            ShowProgressBar {
-                isShowingProgress = false
+            if (isShowingProgress) {
+                ShowProgressBar {
+                    isShowingProgress = false
+                }
             }
-        }
 
-        if (isShowingAlertDialog) {
-            AlertDialog(
-                onClick = {
-                    isShowingAlertDialog = false
-                },
-                dialogTitle = stringResource(id = R.string.error),
-                dialogText = errorMessage
-            )
-        }
-
-        LaunchedEffect(viewModel.user) {
-            launch(Dispatchers.IO) {
-                viewModel.getUser()
+            if (isShowingAlertDialog) {
+                AlertDialog(
+                    onClick = {
+                        isShowingAlertDialog = false
+                    },
+                    dialogTitle = stringResource(id = R.string.error),
+                    dialogText = errorMessage
+                )
             }
-            viewModel.user.collect { user ->
-                isShowingProgress = false
-                currUser = user
-            }
-        }
 
-        LaunchedEffect(viewModel.resultOfLogOut) {
-            viewModel.resultOfLogOut.collect { result ->
-                isShowingProgress = false
-                when (result) {
-                    is ResultOfRequest.Error -> {
-                        errorMessage = result.errorMessage
-                        isShowingAlertDialog = true
+            LaunchedEffect(viewModel.user) {
+                if (currUser == null) {
+                    launch(Dispatchers.IO) {
+                        viewModel.getUser()
                     }
-                    is ResultOfRequest.Success -> {
-                        navController.navigate(Navigation.AUTH_ROUTE) {
-                            popUpTo(Navigation.MAIN_ROUTE)
+                }
+                viewModel.user.collect { user ->
+                    isShowingProgress = false
+                    currUser = user
+                }
+            }
+
+            LaunchedEffect(viewModel.resultOfLogOut) {
+                viewModel.resultOfLogOut.collect { result ->
+                    isShowingProgress = false
+                    when (result) {
+                        is ResultOfRequest.Error -> {
+                            errorMessage = result.errorMessage
+                            isShowingAlertDialog = true
                         }
+
+                        is ResultOfRequest.Success -> {
+                            navController.navigate(Navigation.AUTH_ROUTE) {
+                                popUpTo(Navigation.MAIN_ROUTE)
+                            }
+                        }
+
+                        else -> {}
                     }
-                    else -> {}
                 }
             }
         }
+
     }
 }

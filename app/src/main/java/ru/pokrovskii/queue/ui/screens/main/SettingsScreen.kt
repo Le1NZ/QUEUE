@@ -65,7 +65,6 @@ fun SettingsScreen(
 
         topBar = {
             CenterAlignedTopAppBar(
-                modifier = Modifier.padding(16.dp),
                 title = {
                     Text(text = stringResource(id = R.string.settings))
                 },

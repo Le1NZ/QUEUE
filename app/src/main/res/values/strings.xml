@@ -21,4 +21,13 @@
     <string name="settings">Настройки</string>
     <string name="your_username">Ваше имя</string>
     <string name="success_update_username">Имя успешно изменено</string>
+    <string name="adding_queue">Добавление очереди</string>
+    <string name="name_of_queue">Имя очереди</string>
+    <string name="enter_name_of_queue">Введите имя очереди</string>
+    <string name="add">Добавить</string>
+    <string name="code_of_queue">Код очереди</string>
+    <string name="enter_code">Введите код</string>
+    <string name="queue">Очередь</string>
+    <string name="create">Создать</string>
+    <string name="no_queues">Очередей еще нет</string>
 </resources>

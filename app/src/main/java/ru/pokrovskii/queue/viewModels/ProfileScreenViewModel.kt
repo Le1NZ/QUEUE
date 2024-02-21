@@ -2,6 +2,7 @@ package ru.pokrovskii.queue.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileScreenViewModel @Inject constructor(
     private val userDao : UserDAO,
-    private val userApi : UserApi
+    private val userApi : UserApi,
+    private val auth: FirebaseAuth
 ) : ViewModel() {
 
     private val _user : MutableStateFlow<User?> = MutableStateFlow(null)
