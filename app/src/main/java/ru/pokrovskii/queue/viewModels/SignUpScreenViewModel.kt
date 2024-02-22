@@ -2,6 +2,7 @@ package ru.pokrovskii.queue.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SignUpScreenViewModel @Inject constructor(
     private val userApi: UserApi,
-    private val userDao: UserDAO
+    private val userDao: UserDAO,
+    private val auth: FirebaseAuth
 ) : ViewModel() {
 
     private val _userName = MutableStateFlow("")
@@ -53,10 +55,10 @@ class SignUpScreenViewModel @Inject constructor(
 
     fun signUpUser() {
         viewModelScope.launch(Dispatchers.IO) {
-            val currUser = User(username = _userName.value)
             val resultOfRequest = userApi.signUp(_userEmail.value, _userPassword.value)
             _result.value = resultOfRequest
             if (resultOfRequest is ResultOfRequest.Success) {
+                val currUser = User(username = _userName.value, id = resultOfRequest.result.uid)
                 launch {
                     userApi.setUser(currUser, resultOfRequest.result.uid)
                 }

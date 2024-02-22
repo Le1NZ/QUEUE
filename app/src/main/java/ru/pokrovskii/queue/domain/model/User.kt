@@ -8,7 +8,7 @@ import ru.pokrovskii.queue.domain.DTO.QueueDTO
 @Entity(tableName = "users")
 data class User(
     @PrimaryKey
-    val id: Int = 0,
+    val id: String = "",
     val username: String = "",
     @TypeConverters(ListOfQueueToJsonConverter::class)
     val queues: MutableList<QueueDTO> = mutableListOf()

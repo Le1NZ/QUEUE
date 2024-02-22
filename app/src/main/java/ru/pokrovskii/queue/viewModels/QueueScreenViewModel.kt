@@ -1,16 +1,27 @@
 package ru.pokrovskii.queue.viewModels
 
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ru.pokrovskii.queue.R
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.data.api.QueueApi
 import ru.pokrovskii.queue.data.api.UserApi
-import ru.pokrovskii.queue.data.dataBase.QueueDAO
 import ru.pokrovskii.queue.data.dataBase.UserDAO
 import ru.pokrovskii.queue.domain.DTO.QueueDTO
 import ru.pokrovskii.queue.domain.DTO.UserDTO
@@ -21,9 +32,9 @@ import javax.inject.Inject
 @HiltViewModel
 class QueueScreenViewModel @Inject constructor(
     private val queueApi: QueueApi,
-    private val queueDAO: QueueDAO,
     private val userApi: UserApi,
     private val userDAO: UserDAO,
+    private val auth: FirebaseAuth,
 ) : ViewModel() {
 
     private val _resultOfStarting: MutableStateFlow<ResultOfRequest<Queue>?> =
@@ -37,8 +48,9 @@ class QueueScreenViewModel @Inject constructor(
         MutableStateFlow(null)
     val resultOfNextOfReturn: StateFlow<ResultOfRequest<Unit>?> = _resultOfNextOrReturn
 
-    fun starting(id: String) {
+    fun starting(id: String, context: Context) {
         viewModelScope.launch {
+            _resultOfStarting.update { null }
             queueApi.startListeningQueue(id) { queue: Queue? ->
                 _resultOfStarting.value = ResultOfRequest.Success(queue!!)
             }
@@ -48,12 +60,9 @@ class QueueScreenViewModel @Inject constructor(
     fun deleteQueue(currQueue: QueueDTO) {
         viewModelScope.launch {
             val currUser: User = userDAO.getCurrUser()!!
-            val currUserDTO = UserDTO(currUser.username)
+            val currUserDTO = UserDTO(currUser.id, currUser.username)
             var resultOfRequest1: ResultOfRequest<Unit> = ResultOfRequest.Loading
             var resultOfRequest2: ResultOfRequest<Unit> = ResultOfRequest.Loading
-            launch {
-                queueDAO.deleteQueue(currQueue.id)
-            }
             val job1 = launch {
                 resultOfRequest1 = userApi.deleteQueueFromUser(currQueue)
             }
@@ -61,7 +70,7 @@ class QueueScreenViewModel @Inject constructor(
                 resultOfRequest2 = queueApi.deleteUserFromQueue(currUserDTO, currQueue.id)
             }
             launch {
-                queueApi.endListening()
+                queueApi.endListeningQueue()
             }
             launch {
                 var name = ""
@@ -116,7 +125,8 @@ class QueueScreenViewModel @Inject constructor(
             _resultOfNextOrReturn.update { null }
             val currUser = userDAO.getCurrUser()
             val job = launch {
-                resultOfRequest = queueApi.addUserToQueue(UserDTO(currUser!!.username), queue.id)
+                resultOfRequest =
+                    queueApi.addUserToQueue(UserDTO(currUser!!.id, currUser.username), queue.id)
             }
 
             launch {
@@ -128,4 +138,5 @@ class QueueScreenViewModel @Inject constructor(
             _resultOfNextOrReturn.update { resultOfRequest }
         }
     }
+
 }

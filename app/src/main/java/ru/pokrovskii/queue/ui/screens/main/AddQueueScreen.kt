@@ -39,14 +39,12 @@ import ru.pokrovskii.queue.ui.screens.AlertDialog
 import ru.pokrovskii.queue.ui.screens.Screen
 import ru.pokrovskii.queue.ui.screens.ShowProgressBar
 import ru.pokrovskii.queue.viewModels.AddingQueueScreenViewModel
-import ru.pokrovskii.queue.viewModels.MainScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddQueueScreen(
     navController: NavController,
     viewModel: AddingQueueScreenViewModel = viewModel(),
-    mainScreenViewModel: MainScreenViewModel,
 ) {
 
     var isShowingProgress by remember {
@@ -161,7 +159,7 @@ fun AddQueueScreen(
                             onClick = {
                                 isShowingProgress = true
                                 viewModel.addQueue()
-                                mainScreenViewModel.starting(true)
+                                //mainScreenViewModel.starting(true)
                             },
                             modifier = Modifier.fillMaxWidth(),
 
@@ -245,7 +243,6 @@ fun AddQueueScreen(
                     isShowingProgress = false
                     when (result) {
                         is ResultOfRequest.Success -> {
-                            mainScreenViewModel.starting(true)
                             // Sharing to window of queue info about its id
                             navController.navigate(Screen.QueueScreen.name + "/${result.result.id}")
                         }

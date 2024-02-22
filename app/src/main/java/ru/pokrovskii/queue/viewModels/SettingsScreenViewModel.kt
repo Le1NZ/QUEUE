@@ -49,10 +49,10 @@ class SettingsScreenViewModel @Inject constructor(
             // Creating new instance of User class with new username and the same queues
             val oldUser = userDao.getCurrUser()!!
             val newUser = User(
+                id = auth.currentUser!!.uid,
                 username = _newUserName.value,
                 queues = oldUser.queues
             )
-
 
             val resultOfRequest = userApi.setUser(newUser, auth.currentUser!!.uid)
             _resultOfUpdateUserName.update { null }

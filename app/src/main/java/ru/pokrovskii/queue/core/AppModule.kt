@@ -13,8 +13,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import ru.pokrovskii.queue.data.api.QueueApi
 import ru.pokrovskii.queue.data.api.UserApi
-import ru.pokrovskii.queue.data.dataBase.QueueDAO
-import ru.pokrovskii.queue.data.dataBase.QueueDataBase
 import ru.pokrovskii.queue.data.dataBase.UserDAO
 import ru.pokrovskii.queue.data.dataBase.UserDataBase
 import javax.inject.Singleton
@@ -35,8 +33,8 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideUserApi(): UserApi {
-        return UserApi(provideFirebaseAuth(), provideDataBase())
+    fun provideUserApi(auth: FirebaseAuth, database: FirebaseFirestore): UserApi {
+        return UserApi(auth, database)
     }
 
     @Provides
@@ -59,24 +57,8 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideQueueDataBase(app: Application): QueueDataBase {
-        return Room.databaseBuilder(
-            app,
-            QueueDataBase::class.java,
-            QueueDataBase.DATABASE_NAME
-        ).build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideQueueDao(queueDataBase: QueueDataBase): QueueDAO {
-        return queueDataBase.queueDAO
-    }
-
-    @Provides
-    @Singleton
-    fun provideQueueApi(): QueueApi {
-        return QueueApi(provideFirebaseAuth(), provideDataBase())
+    fun provideQueueApi(auth: FirebaseAuth, database: FirebaseFirestore): QueueApi {
+        return QueueApi(auth, database)
     }
 
 }

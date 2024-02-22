@@ -1,6 +1,12 @@
 package ru.pokrovskii.queue.ui.screens.main
 
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,6 +41,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import ru.pokrovskii.queue.R
@@ -44,7 +53,6 @@ import ru.pokrovskii.queue.domain.DTO.UserDTO
 import ru.pokrovskii.queue.domain.model.Queue
 import ru.pokrovskii.queue.ui.screens.Screen
 import ru.pokrovskii.queue.ui.screens.ShowProgressBar
-import ru.pokrovskii.queue.viewModels.MainScreenViewModel
 import ru.pokrovskii.queue.viewModels.QueueScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +60,6 @@ import ru.pokrovskii.queue.viewModels.QueueScreenViewModel
 fun QueueScreen(
     navController: NavController,
     viewModel: QueueScreenViewModel = viewModel(),
-    mainScreenViewModel: MainScreenViewModel,
     id: String,
 ) {
 
@@ -68,7 +75,7 @@ fun QueueScreen(
     }
 
     var isShowingProgress by remember {
-        mutableStateOf(true)
+        mutableStateOf(false)
     }
 
     var isShowingAlertDialog by remember {
@@ -100,7 +107,6 @@ fun QueueScreen(
                 },
                 actions = {
                     IconButton(onClick = {
-                        mainScreenViewModel.starting(true)
                         viewModel.deleteQueue(QueueDTO(queue.id, queue.name))
                         isShowingProgress = true
                     }) {
@@ -180,8 +186,8 @@ fun QueueScreen(
         }
 
         LaunchedEffect(Unit) {
+            viewModel.starting(id, context)
             isShowingProgress = true
-            viewModel.starting(id)
         }
 
         LaunchedEffect(viewModel.resultOfStarting) {

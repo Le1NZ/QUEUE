@@ -43,13 +43,15 @@ import ru.pokrovskii.queue.ui.Navigation
 import ru.pokrovskii.queue.ui.screens.AlertDialog
 import ru.pokrovskii.queue.ui.screens.Screen
 import ru.pokrovskii.queue.ui.screens.ShowProgressBar
+import ru.pokrovskii.queue.viewModels.MainScreenViewModel
 import ru.pokrovskii.queue.viewModels.SignUpScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
     navController: NavController,
-    viewModel: SignUpScreenViewModel = viewModel()
+    viewModel: SignUpScreenViewModel = viewModel(),
+    mainScreenViewModel: MainScreenViewModel,
 ) {
     val context = LocalContext.current
 
@@ -235,6 +237,7 @@ fun SignUpScreen(
                 when (result) {
                     is ResultOfRequest.Success -> {
                         navController.navigate(Navigation.MAIN_ROUTE) {
+                            mainScreenViewModel.starting()
                             popUpTo(Navigation.AUTH_ROUTE)
                         }
                     }

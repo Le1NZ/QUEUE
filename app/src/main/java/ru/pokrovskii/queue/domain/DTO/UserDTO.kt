@@ -1,5 +1,6 @@
 package ru.pokrovskii.queue.domain.DTO
 
 data class UserDTO(
-    var name: String = ""
+    val id: String = "",
+    var name: String = "",
 )

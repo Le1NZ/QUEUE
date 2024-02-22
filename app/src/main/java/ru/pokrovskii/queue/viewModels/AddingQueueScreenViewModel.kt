@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.data.api.QueueApi
 import ru.pokrovskii.queue.data.api.UserApi
-import ru.pokrovskii.queue.data.dataBase.QueueDAO
 import ru.pokrovskii.queue.data.dataBase.UserDAO
 import ru.pokrovskii.queue.domain.DTO.QueueDTO
 import ru.pokrovskii.queue.domain.DTO.UserDTO
@@ -21,7 +20,6 @@ import javax.inject.Inject
 class AddingQueueScreenViewModel @Inject constructor(
     private val userDAO: UserDAO,
     private val queueApi: QueueApi,
-    private val queueDAO: QueueDAO,
     private val userApi: UserApi,
 ) : ViewModel() {
 
@@ -47,7 +45,10 @@ class AddingQueueScreenViewModel @Inject constructor(
         viewModelScope.launch {
             val currUser = userDAO.getCurrUser()
             var newQueue =
-                Queue(name = _nameOfNewQueue.value, users = mutableListOf(UserDTO(currUser!!.username)))
+                Queue(
+                    name = _nameOfNewQueue.value,
+                    users = mutableListOf(UserDTO(currUser!!.id, currUser.username))
+                )
             val resultOfRequest = queueApi.createQueue(newQueue)
             if (resultOfRequest is ResultOfRequest.Success) {
                 newQueue = resultOfRequest.result
@@ -57,9 +58,6 @@ class AddingQueueScreenViewModel @Inject constructor(
                     userApi.updateQueuesOfCurrUser(currUser.queues)
                 }
                 // Adding info about user to queue
-                launch {
-                    queueDAO.addQueue(newQueue)
-                }
                 launch {
                     userDAO.updateUser(currUser)
                 }
@@ -82,14 +80,12 @@ class AddingQueueScreenViewModel @Inject constructor(
                 launch {
                     queueApi.addUserToQueue(
                         UserDTO(
+                            currUser.id,
                             currUser.username
                         ), newQueue.id
                     )
                 }
                 // Adding info about user to queue
-                launch {
-                    queueDAO.addQueue(newQueue)
-                }
                 launch {
                     userDAO.updateUser(currUser)
                 }

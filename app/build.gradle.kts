@@ -72,7 +72,7 @@ dependencies {
 
     //retrofit
     val retrofitVersion = "2.9.0"
-    val gsonVersion = "2.10"
+    val gsonVersion = "2.10.1"
     implementation("com.google.code.gson:gson:$gsonVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
     implementation("com.squareup.okhttp3:logging-interceptor:3.12.0")
@@ -94,10 +94,6 @@ dependencies {
 
     //FIREBASE FIRESTORE
     implementation("com.google.firebase:firebase-firestore")
-
-    //swipe to refresh
-    implementation("androidx.compose.material:material:1.6.1")
-
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")

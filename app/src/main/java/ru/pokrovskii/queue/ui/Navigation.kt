@@ -72,11 +72,11 @@ object Navigation {
             ) {
                 composable(Screen.SignInScreen.name) {
                     val viewModel = hiltViewModel<SignInScreenViewModel>()
-                    SignInScreen(navController, viewModel)
+                    SignInScreen(navController, viewModel, mainScreenViewModel)
                 }
                 composable(Screen.SignUpScreen.name) {
                     val viewModel = hiltViewModel<SignUpScreenViewModel>()
-                    SignUpScreen(navController, viewModel)
+                    SignUpScreen(navController, viewModel, mainScreenViewModel)
                 }
             }
             navigation(
@@ -96,7 +96,7 @@ object Navigation {
                 }
                 composable(Screen.AddQueueScreen.name) {
                     val viewModel = hiltViewModel<AddingQueueScreenViewModel>()
-                    AddQueueScreen(navController, viewModel, mainScreenViewModel)
+                    AddQueueScreen(navController, viewModel)
                 }
                 composable(
                     route = Screen.QueueScreen.name + "/{id}",
@@ -108,7 +108,7 @@ object Navigation {
                 ) {
                     val id = it.arguments?.getString("id")
                     val viewModel = hiltViewModel<QueueScreenViewModel>()
-                    QueueScreen(navController, viewModel, mainScreenViewModel, id ?: "")
+                    QueueScreen(navController, viewModel, id ?: "")
                 }
             }
         }

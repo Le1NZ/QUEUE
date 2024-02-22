@@ -51,7 +51,7 @@ fun SplashScreen(
 
             job.join()
             viewModel.result.collect { result ->
-                navigationToNextScreen(result, navController)
+                navigationToNextScreen(result, navController, mainScreenViewModel)
             }
         }
 
@@ -69,21 +69,9 @@ fun SplashScreen(
         )
     }
 
-    LaunchedEffect(viewModel.result) {
-        viewModel.result.collect { result ->
-            when (result) {
-                is ResultOfRequest.Success -> {
-                    mainScreenViewModel.starting(true)
-                    // Sharing to window of queue info about its id
-                }
-
-                else -> {}
-            }
-        }
-    }
 }
 
-fun navigationToNextScreen(result: ResultOfRequest<FirebaseUser?>?, navController: NavController) {
+fun navigationToNextScreen(result: ResultOfRequest<FirebaseUser?>?, navController: NavController, mainScreenViewModel: MainScreenViewModel) {
     when (result) {
         is ResultOfRequest.Error -> {
             navController.navigate(Navigation.AUTH_ROUTE) {
@@ -94,6 +82,7 @@ fun navigationToNextScreen(result: ResultOfRequest<FirebaseUser?>?, navControlle
         is ResultOfRequest.Success -> {
             navController.navigate(Navigation.MAIN_ROUTE) {
                 popUpTo(Navigation.SPLASH_ROUTE)
+                mainScreenViewModel.starting()
             }
         }
 

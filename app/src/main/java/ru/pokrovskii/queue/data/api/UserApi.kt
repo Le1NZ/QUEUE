@@ -4,14 +4,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.toObject
-import kotlinx.coroutines.tasks.asDeferred
 import kotlinx.coroutines.tasks.await
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.domain.DTO.QueueDTO
-import ru.pokrovskii.queue.domain.DTO.UserDTO
-import ru.pokrovskii.queue.domain.model.Queue
 import ru.pokrovskii.queue.domain.model.User
 import javax.inject.Inject
 
@@ -19,6 +17,8 @@ class UserApi @Inject constructor(
     private val auth: FirebaseAuth,
     private val database: FirebaseFirestore
 ) {
+
+    private var listenerOfQueues: ListenerRegistration? = null
 
     companion object {
         private const val USERS_COLLECTION = "users"
@@ -123,6 +123,25 @@ class UserApi @Inject constructor(
         }
 
         return resultOfRequest
+    }
+
+    suspend fun startListeningQueues(id: String, updateData: (user: User?) -> Unit) {
+        listenerOfQueues = database
+            .collection(USERS_COLLECTION)
+            .document(id)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    return@addSnapshotListener
+                }
+
+                if (value != null && value.exists()) {
+                    updateData(value.toObject<User>())
+                }
+            }
+    }
+
+    suspend fun endListeningQueues() {
+        listenerOfQueues?.remove()
     }
 
 }
