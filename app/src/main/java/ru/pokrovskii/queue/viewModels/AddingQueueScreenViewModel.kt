@@ -47,7 +47,7 @@ class AddingQueueScreenViewModel @Inject constructor(
         viewModelScope.launch {
             val currUser = userDAO.getCurrUser()
             var newQueue =
-                Queue(name = _nameOfNewQueue.value, users = listOf(UserDTO(currUser!!.username)))
+                Queue(name = _nameOfNewQueue.value, users = mutableListOf(UserDTO(currUser!!.username)))
             val resultOfRequest = queueApi.createQueue(newQueue)
             if (resultOfRequest is ResultOfRequest.Success) {
                 newQueue = resultOfRequest.result

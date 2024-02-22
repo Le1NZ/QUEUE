@@ -30,4 +30,6 @@
     <string name="queue">Очередь</string>
     <string name="create">Создать</string>
     <string name="no_queues">Очередей еще нет</string>
+    <string name="the_next">Следующий</string>
+    <string name="return_to_queue">Вернуться в очередь</string>
 </resources>

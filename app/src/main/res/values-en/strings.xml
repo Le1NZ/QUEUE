@@ -28,4 +28,6 @@
     <string name="queue">Queue</string>
     <string name="create">Create</string>
     <string name="no_queues">There are no queues yet</string>
+    <string name="the_next">The next</string>
+    <string name="return_to_queue">Return to queue</string>
 </resources>

@@ -3,6 +3,7 @@ package ru.pokrovskii.queue.data.api
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.tasks.await
 import ru.pokrovskii.queue.core.ResultOfRequest
@@ -15,6 +16,8 @@ class QueueApi @Inject constructor(
     private val auth: FirebaseAuth,
     private val database: FirebaseFirestore,
 ) {
+
+    private var listener: ListenerRegistration? = null
 
     companion object {
         private const val QUEUE_COLLECTION = "queues"
@@ -131,5 +134,52 @@ class QueueApi @Inject constructor(
 
         return resultOfRequest
     }
+
+    suspend fun theNext(id: String): ResultOfRequest<Unit> {
+        var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
+
+        try {
+            val result = database
+                .collection(QUEUE_COLLECTION)
+                .document(id)
+                .get()
+                .await()
+
+            val currQueue = result.toObject<Queue>()
+            currQueue!!.users.removeAt(0)
+
+            database
+                .collection(QUEUE_COLLECTION)
+                .document(id)
+                .set(currQueue)
+                .await()
+
+            resultOfRequest = ResultOfRequest.Success(Unit)
+        } catch (e: Exception) {
+            resultOfRequest = ResultOfRequest.Error(e.message!!)
+        }
+
+        return resultOfRequest
+    }
+
+    suspend fun startListeningQueue(id: String, updateData: (queue: Queue?) -> Unit) {
+        listener = database
+            .collection(QUEUE_COLLECTION)
+            .document(id)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    return@addSnapshotListener
+                }
+
+                if (value != null && value.exists()) {
+                    updateData(value.toObject<Queue>())
+                }
+            }
+    }
+
+    suspend fun endListening() {
+        listener?.remove()
+    }
+
 
 }

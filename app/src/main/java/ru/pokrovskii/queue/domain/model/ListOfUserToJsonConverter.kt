@@ -8,13 +8,13 @@ import ru.pokrovskii.queue.domain.DTO.UserDTO
 
 class ListOfUserToJsonConverter {
     @TypeConverter
-    fun fromJson(json: String): List<UserDTO> {
-        val listType = object : TypeToken<List<UserDTO>>() {}.type
+    fun fromJson(json: String): MutableList<UserDTO> {
+        val listType = object : TypeToken<MutableList<UserDTO>>() {}.type
         return Gson().fromJson(json, listType)
     }
 
     @TypeConverter
-    fun toJson(list: List<UserDTO>): String {
+    fun toJson(list: MutableList<UserDTO>): String {
         return Gson().toJson(list)
     }
 }
