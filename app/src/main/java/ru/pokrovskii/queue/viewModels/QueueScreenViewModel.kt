@@ -34,7 +34,6 @@ class QueueScreenViewModel @Inject constructor(
     private val queueApi: QueueApi,
     private val userApi: UserApi,
     private val userDAO: UserDAO,
-    private val auth: FirebaseAuth,
 ) : ViewModel() {
 
     private val _resultOfStarting: MutableStateFlow<ResultOfRequest<Queue>?> =
@@ -48,7 +47,7 @@ class QueueScreenViewModel @Inject constructor(
         MutableStateFlow(null)
     val resultOfNextOfReturn: StateFlow<ResultOfRequest<Unit>?> = _resultOfNextOrReturn
 
-    fun starting(id: String, context: Context) {
+    fun starting(id: String) {
         viewModelScope.launch {
             _resultOfStarting.update { null }
             queueApi.startListeningQueue(id) { queue: Queue? ->
@@ -70,7 +69,7 @@ class QueueScreenViewModel @Inject constructor(
                 resultOfRequest2 = queueApi.deleteUserFromQueue(currUserDTO, currQueue.id)
             }
             launch {
-                queueApi.endListeningQueue()
+                queueApi.endListeningQueue(currQueue.id)
             }
             launch {
                 var name = ""

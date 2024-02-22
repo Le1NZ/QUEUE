@@ -186,7 +186,7 @@ fun QueueScreen(
         }
 
         LaunchedEffect(Unit) {
-            viewModel.starting(id, context)
+            viewModel.starting(id)
             isShowingProgress = true
         }
 

@@ -1,21 +1,11 @@
 package ru.pokrovskii.queue.data.api
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Intent
-import android.graphics.Color
-import android.os.Build
 import android.util.Log
-import androidx.compose.ui.platform.LocalAccessibilityManager
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.NotificationCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.toObject
-import io.grpc.Context
 import kotlinx.coroutines.tasks.await
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.domain.DTO.UserDTO
@@ -30,7 +20,7 @@ class QueueApi @Inject constructor(
     private val database: FirebaseFirestore,
 ) {
 
-    private var listenerOfQueue : ListenerRegistration? = null
+    private var listenerOfQueue = hashMapOf<String, ListenerRegistration>()
 
     companion object {
         private const val QUEUE_COLLECTION = "queues"
@@ -116,7 +106,7 @@ class QueueApi @Inject constructor(
         var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
 
         try {
-            val result = database
+            database
                 .collection(QUEUE_COLLECTION)
                 .document(id)
                 .update("users", FieldValue.arrayUnion(user))
@@ -177,10 +167,10 @@ class QueueApi @Inject constructor(
 
     suspend fun startListeningQueue(id: String, updateData: (queue: Queue?) -> Unit) {
         try {
-            listenerOfQueue = database
+            listenerOfQueue[id] = database
                 .collection(QUEUE_COLLECTION)
                 .document(id)
-                .addSnapshotListener{ value, error ->
+                .addSnapshotListener { value, error ->
                     if (error != null) {
                         return@addSnapshotListener
                     }
@@ -189,14 +179,14 @@ class QueueApi @Inject constructor(
                         updateData(value.toObject<Queue>())
                     }
                 }
-
         } catch (e: Exception) {
             Log.wtf("myTag", e.message!!)
         }
     }
 
-    suspend fun endListeningQueue() {
-        listenerOfQueue?.remove()
+    suspend fun endListeningQueue(id: String) {
+        listenerOfQueue[id]?.remove()
+        listenerOfQueue.remove(id)
     }
 
 }

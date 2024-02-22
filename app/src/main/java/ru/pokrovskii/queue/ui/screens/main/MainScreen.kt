@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import ru.pokrovskii.queue.R
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.domain.DTO.QueueDTO
@@ -134,6 +135,7 @@ fun HomeScreen(
                 }
             }
         }
+
         if (isShowingProgress) {
             ShowProgressBar {
                 isShowingProgress = false

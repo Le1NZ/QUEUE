@@ -7,10 +7,12 @@ import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.data.api.UserApi
 import ru.pokrovskii.queue.data.dataBase.UserDAO
+import ru.pokrovskii.queue.domain.model.User
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,23 +22,21 @@ class SplashScreenViewModel @Inject constructor(
     private val userDao: UserDAO,
 ) : ViewModel() {
 
-    private val _result: MutableStateFlow<ResultOfRequest<FirebaseUser?>?> = MutableStateFlow(null)
-    val result: StateFlow<ResultOfRequest<FirebaseUser?>?> = _result
+    private val _result: MutableStateFlow<ResultOfRequest<User?>?> = MutableStateFlow(null)
+    val result: StateFlow<ResultOfRequest<User?>?> = _result
 
     fun starting() {
         viewModelScope.launch {
             if (auth.currentUser != null) {
                 val resultOfRequest = userApi.getUser(auth.currentUser!!.uid)
-                if (resultOfRequest is ResultOfRequest.Success) {
-                    launch {
+                launch {
+                    if (resultOfRequest is ResultOfRequest.Success) {
                         userDao.updateUser(resultOfRequest.result!!)
                     }
-                    _result.value = ResultOfRequest.Success(auth.currentUser)
-                } else if (resultOfRequest is ResultOfRequest.Error) {
-                    _result.value = ResultOfRequest.Error(resultOfRequest.errorMessage)
                 }
+                _result.update { resultOfRequest }
             } else {
-                _result.value = ResultOfRequest.Error("no sign in")
+                _result.update { ResultOfRequest.Error("no sign in") }
             }
         }
     }

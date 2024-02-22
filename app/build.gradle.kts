@@ -72,7 +72,7 @@ dependencies {
 
     //retrofit
     val retrofitVersion = "2.9.0"
-    val gsonVersion = "2.10.1"
+    val gsonVersion = "2.10"
     implementation("com.google.code.gson:gson:$gsonVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
     implementation("com.squareup.okhttp3:logging-interceptor:3.12.0")

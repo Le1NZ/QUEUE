@@ -14,11 +14,13 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import ru.pokrovskii.queue.R
 import ru.pokrovskii.queue.core.ResultOfRequest
+import ru.pokrovskii.queue.domain.model.User
 import ru.pokrovskii.queue.ui.Navigation
 import ru.pokrovskii.queue.viewModels.MainScreenViewModel
 import ru.pokrovskii.queue.viewModels.SplashScreenViewModel
@@ -26,7 +28,7 @@ import ru.pokrovskii.queue.viewModels.SplashScreenViewModel
 @Composable
 fun SplashScreen(
     navController: NavController,
-    viewModel: SplashScreenViewModel = viewModel(),
+    viewModel: SplashScreenViewModel,
     mainScreenViewModel: MainScreenViewModel,
 ) {
     val scale = remember {
@@ -34,28 +36,34 @@ fun SplashScreen(
     }
 
     LaunchedEffect(Unit) {
-        launch {
-            viewModel.starting()
-        }
+        viewModel.starting()
 
-        launch {
-            val job = launch {
-                scale.animateTo(
-                    targetValue = 0.7f,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioHighBouncy,
-                        stiffness = Spring.StiffnessMediumLow
-                    )
+        val job = launch(Dispatchers.Main) {
+            scale.animateTo(
+                targetValue = 0.7f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioHighBouncy,
+                    stiffness = Spring.StiffnessMediumLow
                 )
-            }
-
-            job.join()
-            viewModel.result.collect { result ->
-                navigationToNextScreen(result, navController, mainScreenViewModel)
-            }
+            )
         }
 
+        viewModel.result.collect { result ->
+            job.join()
+            navigationToNextScreen(result, navController)
+        }
+    }
 
+    LaunchedEffect(viewModel.result) {
+        viewModel.result.collect { result ->
+            when (result) {
+                is ResultOfRequest.Success -> {
+                    mainScreenViewModel.starting()
+                }
+
+                else -> {}
+            }
+        }
     }
 
     Box(
@@ -71,7 +79,7 @@ fun SplashScreen(
 
 }
 
-fun navigationToNextScreen(result: ResultOfRequest<FirebaseUser?>?, navController: NavController, mainScreenViewModel: MainScreenViewModel) {
+fun navigationToNextScreen(result: ResultOfRequest<User?>?, navController: NavController) {
     when (result) {
         is ResultOfRequest.Error -> {
             navController.navigate(Navigation.AUTH_ROUTE) {
@@ -82,7 +90,6 @@ fun navigationToNextScreen(result: ResultOfRequest<FirebaseUser?>?, navControlle
         is ResultOfRequest.Success -> {
             navController.navigate(Navigation.MAIN_ROUTE) {
                 popUpTo(Navigation.SPLASH_ROUTE)
-                mainScreenViewModel.starting()
             }
         }
 
