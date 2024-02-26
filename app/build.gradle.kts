@@ -70,20 +70,16 @@ dependencies {
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
 
-    //retrofit
-    val retrofitVersion = "2.9.0"
-    val gsonVersion = "2.10"
+    //Gson
+    val gsonVersion = "2.10.1"
     implementation("com.google.code.gson:gson:$gsonVersion")
-    implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
-    implementation("com.squareup.okhttp3:logging-interceptor:3.12.0")
-    implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
 
     //DI
     val hiltVersion = "2.50"
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
-    kapt("androidx.hilt:hilt-compiler:1.1.0")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    kapt("androidx.hilt:hilt-compiler:1.2.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     //FIREBASE
     implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
