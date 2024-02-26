@@ -90,12 +90,12 @@ class UserApi @Inject constructor(
         return resultOfRequest
     }
 
-    suspend fun updateQueuesOfCurrUser(queues: MutableList<QueueDTO>): ResultOfRequest<Unit> {
+    suspend fun updateQueuesOfCurrUser(queues: MutableList<QueueDTO>, userId: String): ResultOfRequest<Unit> {
         var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
         try {
             database
                 .collection(USERS_COLLECTION)
-                .document(auth.currentUser!!.uid)
+                .document(userId)
                 .update("queues", queues)
                 .await()
 
@@ -107,13 +107,13 @@ class UserApi @Inject constructor(
         return resultOfRequest
     }
 
-    suspend fun deleteQueueFromUser(queue: QueueDTO): ResultOfRequest<Unit> {
+    suspend fun deleteQueueFromUser(queue: QueueDTO, userId: String): ResultOfRequest<Unit> {
         var resultOfRequest : ResultOfRequest<Unit> = ResultOfRequest.Loading
 
         try {
             database
                 .collection(USERS_COLLECTION)
-                .document(auth.currentUser!!.uid)
+                .document(userId)
                 .update("queues", FieldValue.arrayRemove(queue))
                 .await()
 

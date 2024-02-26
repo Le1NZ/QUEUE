@@ -189,4 +189,22 @@ class QueueApi @Inject constructor(
         listenerOfQueue.remove(id)
     }
 
+    suspend fun makeUserAdmin(queue: Queue): ResultOfRequest<Unit> {
+        var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
+
+        try {
+            database
+                .collection(QUEUE_COLLECTION)
+                .document(queue.id)
+                .update("users", queue.users)
+                .await()
+
+            resultOfRequest = ResultOfRequest.Success(Unit)
+        } catch (e: Exception) {
+            resultOfRequest = ResultOfRequest.Error(e.message!!)
+        }
+
+        return resultOfRequest
+    }
+
 }

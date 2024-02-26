@@ -1,24 +1,13 @@
 package ru.pokrovskii.queue.viewModels
 
-import android.Manifest
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import ru.pokrovskii.queue.R
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.data.api.QueueApi
 import ru.pokrovskii.queue.data.api.UserApi
@@ -34,7 +23,10 @@ class QueueScreenViewModel @Inject constructor(
     private val queueApi: QueueApi,
     private val userApi: UserApi,
     private val userDAO: UserDAO,
+    private val auth: FirebaseAuth,
 ) : ViewModel() {
+
+    val idOfCurrUser = auth.currentUser!!.uid
 
     private val _resultOfStarting: MutableStateFlow<ResultOfRequest<Queue>?> =
         MutableStateFlow(null)
@@ -47,6 +39,19 @@ class QueueScreenViewModel @Inject constructor(
         MutableStateFlow(null)
     val resultOfNextOfReturn: StateFlow<ResultOfRequest<Unit>?> = _resultOfNextOrReturn
 
+    private val _resultOfKickOut: MutableStateFlow<ResultOfRequest<Unit>?> =
+        MutableStateFlow(null)
+    val resultOfKickOut: StateFlow<ResultOfRequest<Unit>?> = _resultOfKickOut
+
+
+    private val _resultOfMakingAdmin: MutableStateFlow<ResultOfRequest<Unit>?> =
+        MutableStateFlow(null)
+    val resultOfMakingAdmin: StateFlow<ResultOfRequest<Unit>?> = _resultOfMakingAdmin
+
+    private val _isCurrentUserAdmin: MutableStateFlow<Boolean> =
+        MutableStateFlow(false)
+    val isCurrentUserAdmin: StateFlow<Boolean> = _isCurrentUserAdmin
+
     fun starting(id: String) {
         viewModelScope.launch {
             _resultOfStarting.update { null }
@@ -56,14 +61,15 @@ class QueueScreenViewModel @Inject constructor(
         }
     }
 
-    fun deleteQueue(currQueue: QueueDTO) {
+    fun deleteQueue(currQueue: Queue) {
         viewModelScope.launch {
             val currUser: User = userDAO.getCurrUser()!!
-            val currUserDTO = UserDTO(currUser.id, currUser.username)
             var resultOfRequest1: ResultOfRequest<Unit> = ResultOfRequest.Loading
             var resultOfRequest2: ResultOfRequest<Unit> = ResultOfRequest.Loading
+            val currQueueDTO = findQueueDTO(currUser.queues, currQueue.id)
+            val currUserDTO = UserDTO(currUser.id, currUser.username, currQueueDTO.admin)
             val job1 = launch {
-                resultOfRequest1 = userApi.deleteQueueFromUser(currQueue)
+                resultOfRequest1 = userApi.deleteQueueFromUser(currQueueDTO, auth.currentUser!!.uid)
             }
             val job2 = launch {
                 resultOfRequest2 = queueApi.deleteUserFromQueue(currUserDTO, currQueue.id)
@@ -72,14 +78,7 @@ class QueueScreenViewModel @Inject constructor(
                 queueApi.endListeningQueue(currQueue.id)
             }
             launch {
-                var name = ""
-                for (queue in currUser.queues) {
-                    if (queue.id == currQueue.id) {
-                        name = queue.name
-                        break
-                    }
-                }
-                currUser.queues.remove(QueueDTO(currQueue.id, name))
+                currUser.queues.remove(currQueueDTO)
                 userDAO.updateUser(currUser)
             }
 
@@ -106,13 +105,6 @@ class QueueScreenViewModel @Inject constructor(
                 resultOfRequest = queueApi.theNext(id)
             }
 
-            launch {
-                val currUser = userDAO.getCurrUser()
-                if (currUser!!.queues.isNotEmpty())
-                    currUser.queues.removeAt(0)
-                userDAO.updateUser(currUser)
-            }
-
             job.join()
             _resultOfNextOrReturn.update { resultOfRequest }
         }
@@ -122,20 +114,89 @@ class QueueScreenViewModel @Inject constructor(
         viewModelScope.launch {
             var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
             _resultOfNextOrReturn.update { null }
-            val currUser = userDAO.getCurrUser()
-            val job = launch {
+            val currUser = userApi.getUser(auth.currentUser!!.uid)
+            if (currUser is ResultOfRequest.Success) {
+                val queueDTO = findQueueDTO(currUser.result!!.queues, queue.id)
                 resultOfRequest =
-                    queueApi.addUserToQueue(UserDTO(currUser!!.id, currUser.username), queue.id)
-            }
+                    queueApi.addUserToQueue(
+                        UserDTO(
+                            currUser.result.id,
+                            currUser.result.username,
+                            queueDTO.admin
+                        ), queue.id
+                    )
 
-            launch {
-                currUser!!.queues.add(QueueDTO(queue.id, queue.name))
-                userDAO.updateUser(currUser)
+                _resultOfNextOrReturn.update { resultOfRequest }
             }
-
-            job.join()
-            _resultOfNextOrReturn.update { resultOfRequest }
         }
+    }
+
+    fun isAdmin(queue: Queue, userId: String = auth.currentUser!!.uid) {
+        viewModelScope.launch {
+            if (queue.allUsersAreAdmins)
+                _isCurrentUserAdmin.value = true
+
+            var flag = false
+            val currUser = userApi.getUser(userId)
+            if (currUser is ResultOfRequest.Success) {
+                for (currQueue in currUser.result!!.queues) {
+                    if (queue.id == currQueue.id) {
+                        flag = currQueue.admin
+                        break
+                    }
+                }
+            }
+            _isCurrentUserAdmin.value = flag
+        }
+    }
+
+    fun kickOutUser(currQueue: Queue, currUser: UserDTO) {
+        viewModelScope.launch {
+            _resultOfKickOut.update { null }
+            var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
+            resultOfRequest = queueApi.deleteUserFromQueue(currUser, currQueue.id)
+            if (resultOfRequest is ResultOfRequest.Success) {
+                _resultOfKickOut.update {
+                    ResultOfRequest.Success(Unit)
+                }
+            } else {
+                _resultOfKickOut.update {
+                    ResultOfRequest.Error("some problems")
+                }
+            }
+        }
+    }
+
+    fun makeUserAdmin(index: Int, queue: Queue, userId: String) {
+        viewModelScope.launch {
+            _resultOfMakingAdmin.update { null }
+
+            val result = userApi.getUser(userId)
+            if (result is ResultOfRequest.Success) {
+                for (currQueue in result.result!!.queues) {
+                    if (currQueue.id == queue.id) {
+                        currQueue.admin = true
+                        break
+                    }
+                }
+                userApi.updateQueuesOfCurrUser(result.result.queues, userId)
+            }
+
+            var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
+            queue.users[index].admin = true
+            resultOfRequest = queueApi.makeUserAdmin(queue)
+
+            _resultOfMakingAdmin.update { resultOfRequest }
+        }
+    }
+
+    private fun findQueueDTO(queues: MutableList<QueueDTO>, id: String): QueueDTO {
+        for (currQueue in queues) {
+            if (id == currQueue.id) {
+                return currQueue
+            }
+        }
+        return QueueDTO()
     }
 
 }

@@ -1,7 +1,6 @@
 package ru.pokrovskii.queue.ui.screens.main
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -56,15 +58,19 @@ fun AddQueueScreen(
     }
 
     var isNameOfQueueIsEmpty by remember {
-        mutableStateOf(false)
+        mutableStateOf(true)
     }
 
     var selectedTabIndex by remember {
-        mutableStateOf(0)
+        mutableIntStateOf(0)
     }
 
     var errorMessage by remember {
         mutableStateOf("")
+    }
+
+    var switchAdmins by remember {
+        mutableStateOf(true)
     }
 
     val newQueueName: String by viewModel.nameOfNewQueue.collectAsState()
@@ -116,108 +122,117 @@ fun AddQueueScreen(
 
             // First tab ADDING
             if (selectedTabIndex == 0) {
-                Box(
+                Column(
                     Modifier
-                        .padding(16.dp)
-                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.Top
                 ) {
-                    Column(
-                        verticalArrangement = Arrangement.Top
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.code_of_queue),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        OutlinedTextField(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 16.dp),
-                            value = addQueueName,
-                            isError = isNameOfQueueIsEmpty,
-                            onValueChange = {
-                                viewModel.updateNameOfAddQueue(it)
-                                isNameOfQueueIsEmpty = it.isEmpty()
-                            },
-                            label = {
-                                Text(stringResource(id = R.string.enter_code))
-                            },
-                            supportingText = {
-                                if (!isNameOfQueueIsEmpty) {
-                                    Text("")
-                                } else {
-                                    Text(stringResource(id = R.string.field_should_be_not_empty))
-                                }
+                    Text(
+                        text = stringResource(id = R.string.code_of_queue),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                        value = addQueueName,
+                        isError = isNameOfQueueIsEmpty,
+                        onValueChange = {
+                            viewModel.updateNameOfAddQueue(it)
+                            isNameOfQueueIsEmpty = it.isEmpty()
+                        },
+                        label = {
+                            Text(stringResource(id = R.string.enter_code))
+                        },
+                        supportingText = {
+                            if (!isNameOfQueueIsEmpty) {
+                                Text("")
+                            } else {
+                                Text(stringResource(id = R.string.field_should_be_not_empty))
                             }
-                        )
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        Button(
-                            onClick = {
-                                isShowingProgress = true
-                                viewModel.addQueue()
-                                //mainScreenViewModel.starting(true)
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-
-                            ) {
-                            Text(text = stringResource(id = R.string.add), fontSize = 16.sp)
                         }
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Button(
+                        onClick = {
+                            isShowingProgress = true
+                            viewModel.addQueue()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+
+                        ) {
+                        Text(text = stringResource(id = R.string.add), fontSize = 16.sp)
                     }
                 }
             } else { // Second tab CREATING
-                Box(
+                Column(
                     Modifier
-                        .padding(16.dp)
-                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.Top
                 ) {
-                    Column(
-                        verticalArrangement = Arrangement.Top
+                    Text(
+                        text = stringResource(id = R.string.name_of_queue),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                        value = newQueueName,
+                        isError = isNameOfQueueIsEmpty,
+                        onValueChange = {
+                            viewModel.updateNameOfNewQueue(it)
+                            isNameOfQueueIsEmpty = it.isEmpty()
+                        },
+                        label = {
+                            Text(stringResource(id = R.string.enter_name))
+                        },
+                        supportingText = {
+                            if (!isNameOfQueueIsEmpty) {
+                                Text("")
+                            } else {
+                                Text(stringResource(id = R.string.field_should_be_not_empty))
+                            }
+                        }
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(id = R.string.name_of_queue),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        OutlinedTextField(
+                            text = stringResource(id = R.string.is_all_users_are_admin),
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 16.dp),
-                            value = newQueueName,
-                            isError = isNameOfQueueIsEmpty,
-                            onValueChange = {
-                                viewModel.updateNameOfNewQueue(it)
-                                isNameOfQueueIsEmpty = it.isEmpty()
-                            },
-                            label = {
-                                Text(stringResource(id = R.string.enter_name))
-                            },
-                            supportingText = {
-                                if (!isNameOfQueueIsEmpty) {
-                                    Text("")
-                                } else {
-                                    Text(stringResource(id = R.string.field_should_be_not_empty))
-                                }
-                            }
+                                .weight(1f),
+                            fontSize = 16.sp
                         )
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        Button(
-                            onClick = {
-                                isShowingProgress = true
-                                viewModel.createQueue()
-                            },
-                            modifier = Modifier.fillMaxWidth(),
 
-                            ) {
-                            Text(text = stringResource(id = R.string.add), fontSize = 16.sp)
-                        }
+                        Switch(checked = switchAdmins, onCheckedChange = {
+                            switchAdmins = it
+                        })
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Button(
+                        onClick = {
+                            isShowingProgress = true
+                            viewModel.createQueue(switchAdmins)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+
+                        ) {
+                        Text(text = stringResource(id = R.string.add), fontSize = 16.sp)
                     }
                 }
             }
@@ -258,5 +273,59 @@ fun AddQueueScreen(
             }
         }
 
+    }
+}
+
+@Composable
+@Preview
+@OptIn(ExperimentalMaterial3Api::class)
+fun Preview() {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.Top
+    ) {
+        Text(
+            modifier = Modifier.padding(start = 16.dp),
+            text = stringResource(id = R.string.name_of_queue),
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            value = "newQueueName",
+            isError = true,
+            onValueChange = {
+            },
+            label = {
+                Text(stringResource(id = R.string.enter_name))
+            },
+            supportingText = {
+                if (!true) {
+                    Text("")
+                } else {
+                    Text(stringResource(id = R.string.field_should_be_not_empty))
+                }
+            }
+        )
+
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalAlignment = Alignment.Bottom
+    ) {
+        Button(
+            onClick = {
+                //isShowingProgress = true
+                //viewModel.createQueue()
+            },
+            modifier = Modifier.fillMaxWidth(),
+
+            ) {
+            Text(text = stringResource(id = R.string.add), fontSize = 16.sp)
+        }
     }
 }

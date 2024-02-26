@@ -12,4 +12,5 @@ data class Queue(
     val name: String = "Queue",
     @TypeConverters(ListOfUserToJsonConverter::class)
     val users: MutableList<UserDTO> = mutableListOf(),
+    val allUsersAreAdmins: Boolean = false,
 )
