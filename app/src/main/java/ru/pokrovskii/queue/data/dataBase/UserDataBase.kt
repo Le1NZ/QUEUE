@@ -4,7 +4,6 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import ru.pokrovskii.queue.domain.model.ListOfQueueToJsonConverter
-import ru.pokrovskii.queue.domain.model.ListOfUserToJsonConverter
 import ru.pokrovskii.queue.domain.model.User
 import javax.inject.Singleton
 

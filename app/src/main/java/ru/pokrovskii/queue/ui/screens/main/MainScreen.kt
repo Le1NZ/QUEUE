@@ -32,7 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.firebase.auth.FirebaseAuth
 import ru.pokrovskii.queue.R
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.domain.DTO.QueueDTO
@@ -99,7 +98,9 @@ fun HomeScreen(
 
         if (queues.isEmpty()) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
                 contentAlignment = Alignment.Center
             ) {
                 Text(text = stringResource(id = R.string.no_queues), fontSize = 20.sp)

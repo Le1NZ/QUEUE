@@ -15,7 +15,6 @@ import ru.pokrovskii.queue.data.dataBase.UserDAO
 import ru.pokrovskii.queue.domain.DTO.QueueDTO
 import ru.pokrovskii.queue.domain.DTO.UserDTO
 import ru.pokrovskii.queue.domain.model.Queue
-import ru.pokrovskii.queue.domain.model.User
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,8 +24,6 @@ class QueueScreenViewModel @Inject constructor(
     private val userDAO: UserDAO,
     private val auth: FirebaseAuth,
 ) : ViewModel() {
-
-    val idOfCurrUser = auth.currentUser!!.uid
 
     private val _resultOfStarting: MutableStateFlow<ResultOfRequest<Queue>?> =
         MutableStateFlow(null)
@@ -52,6 +49,7 @@ class QueueScreenViewModel @Inject constructor(
         MutableStateFlow(false)
     val isCurrentUserAdmin: StateFlow<Boolean> = _isCurrentUserAdmin
 
+
     fun starting(id: String) {
         viewModelScope.launch {
             _resultOfStarting.update { null }
@@ -63,7 +61,7 @@ class QueueScreenViewModel @Inject constructor(
 
     fun deleteQueue(currQueue: Queue) {
         viewModelScope.launch {
-            val currUser: User = userDAO.getCurrUser()!!
+            val currUser = userDAO.getCurrUser()!!
             var resultOfRequest1: ResultOfRequest<Unit> = ResultOfRequest.Loading
             var resultOfRequest2: ResultOfRequest<Unit> = ResultOfRequest.Loading
             val currQueueDTO = findQueueDTO(currUser.queues, currQueue.id)
@@ -98,26 +96,20 @@ class QueueScreenViewModel @Inject constructor(
 
     fun theNextUser(id: String) {
         viewModelScope.launch {
-            var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
             _resultOfNextOrReturn.update { null }
 
-            val job = launch {
-                resultOfRequest = queueApi.theNext(id)
-            }
-
-            job.join()
+            val resultOfRequest: ResultOfRequest<Unit> = queueApi.theNext(id)
             _resultOfNextOrReturn.update { resultOfRequest }
         }
     }
 
     fun returnToQueue(queue: Queue) {
         viewModelScope.launch {
-            var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
             _resultOfNextOrReturn.update { null }
             val currUser = userApi.getUser(auth.currentUser!!.uid)
             if (currUser is ResultOfRequest.Success) {
                 val queueDTO = findQueueDTO(currUser.result!!.queues, queue.id)
-                resultOfRequest =
+                val resultOfRequest =
                     queueApi.addUserToQueue(
                         UserDTO(
                             currUser.result.id,
@@ -133,8 +125,10 @@ class QueueScreenViewModel @Inject constructor(
 
     fun isAdmin(queue: Queue, userId: String = auth.currentUser!!.uid) {
         viewModelScope.launch {
-            if (queue.allUsersAreAdmins)
+            if (queue.allUsersAreAdmins) {
                 _isCurrentUserAdmin.value = true
+                return@launch
+            }
 
             var flag = false
             val currUser = userApi.getUser(userId)
@@ -153,17 +147,9 @@ class QueueScreenViewModel @Inject constructor(
     fun kickOutUser(currQueue: Queue, currUser: UserDTO) {
         viewModelScope.launch {
             _resultOfKickOut.update { null }
-            var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
-            resultOfRequest = queueApi.deleteUserFromQueue(currUser, currQueue.id)
-            if (resultOfRequest is ResultOfRequest.Success) {
-                _resultOfKickOut.update {
-                    ResultOfRequest.Success(Unit)
-                }
-            } else {
-                _resultOfKickOut.update {
-                    ResultOfRequest.Error("some problems")
-                }
-            }
+
+            val resultOfRequest = queueApi.deleteUserFromQueue(currUser, currQueue.id)
+            _resultOfKickOut.update { resultOfRequest }
         }
     }
 
@@ -182,9 +168,8 @@ class QueueScreenViewModel @Inject constructor(
                 userApi.updateQueuesOfCurrUser(result.result.queues, userId)
             }
 
-            var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
             queue.users[index].admin = true
-            resultOfRequest = queueApi.makeUserAdmin(queue)
+            val resultOfRequest = queueApi.makeUserAdmin(queue)
 
             _resultOfMakingAdmin.update { resultOfRequest }
         }

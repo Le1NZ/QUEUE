@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.data.api.UserApi
 import ru.pokrovskii.queue.data.dataBase.UserDAO
-import ru.pokrovskii.queue.domain.model.User
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,12 +44,12 @@ class SignInScreenViewModel @Inject constructor(
 
             if (resultOfRequest is ResultOfRequest.Success) {
                 val resultOfRequestOfUserData = userApi.getUser(resultOfRequest.result.uid)
-                if (resultOfRequestOfUserData is ResultOfRequest.Success) {
-                    userDao.addUser(resultOfRequestOfUserData.result!!)
-                    _result.update { resultOfRequest }
-                } else if (resultOfRequestOfUserData is ResultOfRequest.Error) {
-                    _result.update { ResultOfRequest.Error(resultOfRequestOfUserData.errorMessage) }
+                launch {
+                    if (resultOfRequestOfUserData is ResultOfRequest.Success) {
+                        userDao.addUser(resultOfRequestOfUserData.result!!)
+                    }
                 }
+                _result.update { resultOfRequest }
             } else {
                 _result.update { resultOfRequest }
             }

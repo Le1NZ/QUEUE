@@ -9,7 +9,7 @@ import ru.pokrovskii.queue.domain.DTO.QueueDTO
 data class User(
     @PrimaryKey
     val id: String = "",
-    val username: String = "",
+    var username: String = "",
     @TypeConverters(ListOfQueueToJsonConverter::class)
     val queues: MutableList<QueueDTO> = mutableListOf()
 )

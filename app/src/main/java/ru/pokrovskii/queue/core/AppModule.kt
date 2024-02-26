@@ -33,8 +33,8 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideUserApi(): UserApi {
-        return UserApi(provideFirebaseAuth(), provideDataBase())
+    fun provideUserApi(auth: FirebaseAuth, database: FirebaseFirestore): UserApi {
+        return UserApi(auth, database)
     }
 
     @Provides
@@ -57,8 +57,8 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideQueueApi(): QueueApi {
-        return QueueApi(provideFirebaseAuth(), provideDataBase())
+    fun provideQueueApi(database: FirebaseFirestore): QueueApi {
+        return QueueApi(database)
     }
 
 }

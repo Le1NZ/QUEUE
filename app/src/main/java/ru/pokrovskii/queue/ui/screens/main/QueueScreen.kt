@@ -44,13 +44,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import ru.pokrovskii.queue.R
 import ru.pokrovskii.queue.core.ResultOfRequest
-import ru.pokrovskii.queue.domain.DTO.QueueDTO
 import ru.pokrovskii.queue.domain.DTO.UserDTO
 import ru.pokrovskii.queue.domain.model.Queue
 import ru.pokrovskii.queue.ui.screens.Screen
 import ru.pokrovskii.queue.ui.screens.ShowProgressBar
 import ru.pokrovskii.queue.viewModels.QueueScreenViewModel
-import kotlin.math.exp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,7 +93,9 @@ fun QueueScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        navController.navigate(Screen.MainScreen.name)
+                        navController.navigate(Screen.MainScreen.name) {
+                            popUpTo(Screen.MainScreen.name)
+                        }
                     }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_back),
@@ -215,7 +215,9 @@ fun QueueScreen(
                 when (result) {
                     is ResultOfRequest.Success -> {
                         isShowingProgress = false
-                        navController.navigate(Screen.MainScreen.name)
+                        navController.navigate(Screen.MainScreen.name) {
+                            popUpTo(Screen.MainScreen.name)
+                        }
                     }
 
                     is ResultOfRequest.Error -> {
@@ -249,7 +251,9 @@ fun QueueScreen(
 
     }
     BackHandler {
-        navController.navigate(Screen.MainScreen.name)
+        navController.navigate(Screen.MainScreen.name) {
+            popUpTo(Screen.MainScreen.name)
+        }
     }
 }
 

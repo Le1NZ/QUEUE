@@ -30,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -137,6 +136,8 @@ fun AddQueueScreen(
                             .fillMaxWidth()
                             .padding(top = 16.dp),
                         value = addQueueName,
+                        singleLine = true,
+                        maxLines = 1,
                         isError = isNameOfQueueIsEmpty,
                         onValueChange = {
                             viewModel.updateNameOfAddQueue(it)
@@ -155,7 +156,9 @@ fun AddQueueScreen(
                     )
                 }
                 Row(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
                     verticalAlignment = Alignment.Bottom
                 ) {
                     Button(
@@ -186,6 +189,8 @@ fun AddQueueScreen(
                             .padding(top = 16.dp),
                         value = newQueueName,
                         isError = isNameOfQueueIsEmpty,
+                        maxLines = 1,
+                        singleLine = true,
                         onValueChange = {
                             viewModel.updateNameOfNewQueue(it)
                             isNameOfQueueIsEmpty = it.isEmpty()
@@ -273,59 +278,5 @@ fun AddQueueScreen(
             }
         }
 
-    }
-}
-
-@Composable
-@Preview
-@OptIn(ExperimentalMaterial3Api::class)
-fun Preview() {
-    Column(
-        modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.Top
-    ) {
-        Text(
-            modifier = Modifier.padding(start = 16.dp),
-            text = stringResource(id = R.string.name_of_queue),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        )
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            value = "newQueueName",
-            isError = true,
-            onValueChange = {
-            },
-            label = {
-                Text(stringResource(id = R.string.enter_name))
-            },
-            supportingText = {
-                if (!true) {
-                    Text("")
-                } else {
-                    Text(stringResource(id = R.string.field_should_be_not_empty))
-                }
-            }
-        )
-
-    }
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalAlignment = Alignment.Bottom
-    ) {
-        Button(
-            onClick = {
-                //isShowingProgress = true
-                //viewModel.createQueue()
-            },
-            modifier = Modifier.fillMaxWidth(),
-
-            ) {
-            Text(text = stringResource(id = R.string.add), fontSize = 16.sp)
-        }
     }
 }

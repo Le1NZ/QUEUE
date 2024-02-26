@@ -25,9 +25,11 @@ class AddingQueueScreenViewModel @Inject constructor(
     private val auth: FirebaseAuth,
 ) : ViewModel() {
 
+    // Property for name of queue to create
     private val _nameOfNewQueue: MutableStateFlow<String> = MutableStateFlow("")
     val nameOfNewQueue: StateFlow<String> = _nameOfNewQueue
 
+    // Property for name of queue to afd
     private val _nameOfAddQueue: MutableStateFlow<String> = MutableStateFlow("")
     val nameOfAddQueue: StateFlow<String> = _nameOfAddQueue
 
@@ -72,18 +74,20 @@ class AddingQueueScreenViewModel @Inject constructor(
     fun addQueue() {
         viewModelScope.launch {
             val currUser = userDAO.getCurrUser()
+            // If user is already have this queue
             if (checkForAlreadyAddedQueue(currUser!!.queues, _nameOfAddQueue.value)) {
                 _resultOfCreatingQueue.update { ResultOfRequest.Error("You are already in this queue") }
                 return@launch
             }
-            var resultOfGettingQueue = queueApi.getQueue(_nameOfAddQueue.value)
+            val resultOfGettingQueue = queueApi.getQueue(_nameOfAddQueue.value)
             if (resultOfGettingQueue is ResultOfRequest.Success) {
                 val newQueue = resultOfGettingQueue.result
-                // Adding new queue to DB
                 currUser.queues.add(QueueDTO(newQueue.id, newQueue.name, false))
+                // Add queue to user
                 launch {
                     userApi.updateQueuesOfCurrUser(currUser.queues, auth.currentUser!!.uid)
                 }
+                // Add user to queue
                 launch {
                     queueApi.addUserToQueue(
                         UserDTO(
@@ -93,12 +97,10 @@ class AddingQueueScreenViewModel @Inject constructor(
                         ), newQueue.id
                     )
                 }
-                // Adding info about user to queue
+                // Update user in local DB
                 launch {
                     userDAO.updateUser(currUser)
                 }
-            } else if (resultOfGettingQueue is ResultOfRequest.Error) {
-                resultOfGettingQueue = ResultOfRequest.Error("The code is wrong")
             }
 
             _resultOfCreatingQueue.update { resultOfGettingQueue }

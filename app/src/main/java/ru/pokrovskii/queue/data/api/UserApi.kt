@@ -26,8 +26,7 @@ class UserApi @Inject constructor(
 
 
     suspend fun signUp(email: String, password: String): ResultOfRequest<FirebaseUser> {
-        var resultOfRequest: ResultOfRequest<FirebaseUser> = ResultOfRequest.Loading
-        resultOfRequest = try {
+        val resultOfRequest: ResultOfRequest<FirebaseUser> = try {
             auth.createUserWithEmailAndPassword(email, password).await()
             ResultOfRequest.Success(auth.currentUser!!)
         } catch (e: Exception) {
@@ -38,8 +37,7 @@ class UserApi @Inject constructor(
     }
 
     suspend fun signIn(email: String, password: String): ResultOfRequest<FirebaseUser> {
-        var resultOfRequest: ResultOfRequest<FirebaseUser> = ResultOfRequest.Loading
-        resultOfRequest = try {
+        val resultOfRequest: ResultOfRequest<FirebaseUser> = try {
             auth.signInWithEmailAndPassword(email, password).await()
             ResultOfRequest.Success(auth.currentUser!!)
         } catch (e: Exception) {
@@ -49,83 +47,79 @@ class UserApi @Inject constructor(
         return resultOfRequest
     }
 
-    suspend fun logOut(): ResultOfRequest<Unit> {
+    fun logOut(): ResultOfRequest<Unit> {
         auth.signOut()
         return ResultOfRequest.Success(Unit)
     }
 
     suspend fun setUser(user: User, userId: String): ResultOfRequest<Unit?> {
-        var resultOfRequest: ResultOfRequest<Unit?> = ResultOfRequest.Loading
-        try {
+        val resultOfRequest: ResultOfRequest<Unit?> = try {
             database
                 .collection(USERS_COLLECTION)
                 .document(userId)
                 .set(user, SetOptions.merge())
                 .await()
-            resultOfRequest = ResultOfRequest.Success(Unit)
+            ResultOfRequest.Success(Unit)
         } catch (e: Exception) {
-            resultOfRequest = ResultOfRequest.Error(e.message!!)
+            ResultOfRequest.Error(e.message!!)
         }
 
         return resultOfRequest
     }
 
     suspend fun getUser(userId: String): ResultOfRequest<User?> {
-        var resultOfRequest: ResultOfRequest<User?> = ResultOfRequest.Loading
-        try {
+        val resultOfRequest: ResultOfRequest<User?> = try {
             val result = database
                 .collection(USERS_COLLECTION)
                 .document(userId)
                 .get()
                 .await()
             if (result.exists()) {
-                resultOfRequest = ResultOfRequest.Success(result.toObject<User>())
+                ResultOfRequest.Success(result.toObject<User>())
             } else {
-                resultOfRequest = ResultOfRequest.Error("The object is not exist")
+                ResultOfRequest.Error("The object is not exist")
             }
         } catch (e: Exception) {
-            resultOfRequest = ResultOfRequest.Error(e.message!!)
+            ResultOfRequest.Error(e.message!!)
         }
 
         return resultOfRequest
     }
 
     suspend fun updateQueuesOfCurrUser(queues: MutableList<QueueDTO>, userId: String): ResultOfRequest<Unit> {
-        var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
-        try {
+        val resultOfRequest: ResultOfRequest<Unit> = try {
             database
                 .collection(USERS_COLLECTION)
                 .document(userId)
                 .update("queues", queues)
                 .await()
 
-            resultOfRequest = ResultOfRequest.Success(Unit)
+            ResultOfRequest.Success(Unit)
         } catch (e: Exception) {
-            resultOfRequest = ResultOfRequest.Error(e.message!!)
+            ResultOfRequest.Error(e.message!!)
         }
 
         return resultOfRequest
     }
 
     suspend fun deleteQueueFromUser(queue: QueueDTO, userId: String): ResultOfRequest<Unit> {
-        var resultOfRequest : ResultOfRequest<Unit> = ResultOfRequest.Loading
 
-        try {
+        val resultOfRequest : ResultOfRequest<Unit> = try {
             database
                 .collection(USERS_COLLECTION)
                 .document(userId)
                 .update("queues", FieldValue.arrayRemove(queue))
                 .await()
 
-            resultOfRequest = ResultOfRequest.Success(Unit)
+            ResultOfRequest.Success(Unit)
         } catch (e: Exception) {
-            resultOfRequest = ResultOfRequest.Error(e.message!!)
+            ResultOfRequest.Error(e.message!!)
         }
 
         return resultOfRequest
     }
 
-    suspend fun startListeningQueues(id: String, updateData: (user: User?) -> Unit) {
+    fun startListeningQueues(id: String, updateData: (user: User?) -> Unit) {
         listenerOfQueues = database
             .collection(USERS_COLLECTION)
             .document(id)
@@ -140,7 +134,7 @@ class UserApi @Inject constructor(
             }
     }
 
-    suspend fun endListeningQueues() {
+    fun endListeningQueues() {
         listenerOfQueues?.remove()
     }
 

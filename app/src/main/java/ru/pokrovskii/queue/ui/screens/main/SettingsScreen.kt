@@ -111,6 +111,8 @@ fun SettingsScreen(
                         .fillMaxWidth()
                         .padding(top = 16.dp),
                     value = userName,
+                    maxLines = 1,
+                    singleLine = true,
                     isError = isUserNameEmpty,
                     onValueChange = {
                         viewModel.updateUserName(it)

@@ -1,7 +1,6 @@
 package ru.pokrovskii.queue.data.api
 
 import android.util.Log
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -16,7 +15,6 @@ import javax.inject.Singleton
 
 @Singleton
 class QueueApi @Inject constructor(
-    private val auth: FirebaseAuth,
     private val database: FirebaseFirestore,
 ) {
 
@@ -27,7 +25,7 @@ class QueueApi @Inject constructor(
     }
 
     suspend fun createQueue(queue: Queue): ResultOfRequest<Queue> {
-        var resultOfRequest: ResultOfRequest<Queue> = ResultOfRequest.Loading
+        var resultOfRequest: ResultOfRequest<Queue>
         try {
             val idOfNewQueue = database
                 .collection(QUEUE_COLLECTION)
@@ -50,25 +48,24 @@ class QueueApi @Inject constructor(
     }
 
     suspend fun getQueue(id: String): ResultOfRequest<Queue> {
-        var resultOfRequest: ResultOfRequest<Queue> = ResultOfRequest.Loading
 
-        try {
+        val resultOfRequest: ResultOfRequest<Queue> = try {
             val result = database
                 .collection(QUEUE_COLLECTION)
                 .document(id)
                 .get()
                 .await()
 
-            resultOfRequest = ResultOfRequest.Success(result.toObject<Queue>()!!)
+            ResultOfRequest.Success(result.toObject<Queue>()!!)
         } catch (e: Exception) {
-            resultOfRequest = ResultOfRequest.Error(e.message ?: "")
+            ResultOfRequest.Error(e.message ?: "")
         }
 
         return resultOfRequest
     }
 
     suspend fun updateNameOfUserInQueues(user: User, newUsername: String): ResultOfRequest<Unit> {
-        var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
+        var resultOfRequest: ResultOfRequest<Unit>
 
         try {
             for (queue in user.queues) {
@@ -103,43 +100,41 @@ class QueueApi @Inject constructor(
     }
 
     suspend fun addUserToQueue(user: UserDTO, id: String): ResultOfRequest<Unit> {
-        var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
 
-        try {
+        val resultOfRequest: ResultOfRequest<Unit> = try {
             database
                 .collection(QUEUE_COLLECTION)
                 .document(id)
                 .update("users", FieldValue.arrayUnion(user))
                 .await()
 
-            resultOfRequest = ResultOfRequest.Success(Unit)
+            ResultOfRequest.Success(Unit)
         } catch (e: Exception) {
-            resultOfRequest = ResultOfRequest.Error(e.message ?: "")
+            ResultOfRequest.Error(e.message ?: "")
         }
 
         return resultOfRequest
     }
 
     suspend fun deleteUserFromQueue(user: UserDTO, id: String): ResultOfRequest<Unit> {
-        var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
 
-        try {
+        val resultOfRequest: ResultOfRequest<Unit> = try {
             database
                 .collection(QUEUE_COLLECTION)
                 .document(id)
                 .update("users", FieldValue.arrayRemove(user))
                 .await()
 
-            resultOfRequest = ResultOfRequest.Success(Unit)
+            ResultOfRequest.Success(Unit)
         } catch (e: Exception) {
-            resultOfRequest = ResultOfRequest.Error(e.message!!)
+            ResultOfRequest.Error(e.message!!)
         }
 
         return resultOfRequest
     }
 
     suspend fun theNext(id: String): ResultOfRequest<Unit> {
-        var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
+        var resultOfRequest: ResultOfRequest<Unit>
 
         try {
             val result = database
@@ -165,7 +160,7 @@ class QueueApi @Inject constructor(
         return resultOfRequest
     }
 
-    suspend fun startListeningQueue(id: String, updateData: (queue: Queue?) -> Unit) {
+    fun startListeningQueue(id: String, updateData: (queue: Queue?) -> Unit) {
         try {
             listenerOfQueue[id] = database
                 .collection(QUEUE_COLLECTION)
@@ -184,24 +179,23 @@ class QueueApi @Inject constructor(
         }
     }
 
-    suspend fun endListeningQueue(id: String) {
+    fun endListeningQueue(id: String) {
         listenerOfQueue[id]?.remove()
         listenerOfQueue.remove(id)
     }
 
     suspend fun makeUserAdmin(queue: Queue): ResultOfRequest<Unit> {
-        var resultOfRequest: ResultOfRequest<Unit> = ResultOfRequest.Loading
 
-        try {
+        val resultOfRequest: ResultOfRequest<Unit> = try {
             database
                 .collection(QUEUE_COLLECTION)
                 .document(queue.id)
                 .update("users", queue.users)
                 .await()
 
-            resultOfRequest = ResultOfRequest.Success(Unit)
+            ResultOfRequest.Success(Unit)
         } catch (e: Exception) {
-            resultOfRequest = ResultOfRequest.Error(e.message!!)
+            ResultOfRequest.Error(e.message!!)
         }
 
         return resultOfRequest

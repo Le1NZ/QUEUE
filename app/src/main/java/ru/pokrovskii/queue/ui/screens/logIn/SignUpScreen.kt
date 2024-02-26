@@ -1,7 +1,6 @@
 package ru.pokrovskii.queue.ui.screens.logIn
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,8 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -82,7 +80,6 @@ fun SignUpScreen(
         mutableStateOf("")
     }
 
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -103,6 +100,7 @@ fun SignUpScreen(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = userEmail,
+                singleLine = true,
                 maxLines = 1,
                 isError = !isEmailCorrect,
                 onValueChange = {
@@ -117,6 +115,7 @@ fun SignUpScreen(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = userName,
+                singleLine = true,
                 isError = !isNameCorrect,
                 maxLines = 1,
                 onValueChange = {
@@ -139,6 +138,7 @@ fun SignUpScreen(
                 modifier = Modifier.fillMaxWidth(),
                 value = userPassword,
                 maxLines = 1,
+                singleLine = true,
                 isError = !isPasswordCorrect,
                 visualTransformation = PasswordVisualTransformation(),
                 onValueChange = {
@@ -162,6 +162,7 @@ fun SignUpScreen(
                 modifier = Modifier.fillMaxWidth(),
                 value = userPasswordAgain,
                 maxLines = 1,
+                singleLine = true,
                 isError = !isPasswordsEqual,
                 visualTransformation = PasswordVisualTransformation(),
                 onValueChange = {
@@ -214,14 +215,17 @@ fun SignUpScreen(
                 text = stringResource(id = R.string.sign_in),
                 Modifier.clickable {
                     navController.navigate(Screen.SignInScreen.name)
-                }
+                },
+                color = MaterialTheme.colorScheme.secondary
             )
         }
+
         if (isShowingProgress) {
             ShowProgressBar {
                 isShowingProgress = false
             }
         }
+
         if (isShowingAlertDialog) {
             AlertDialog(
                 onClick = {
@@ -231,6 +235,7 @@ fun SignUpScreen(
                 dialogText = errorMessage
             )
         }
+
         LaunchedEffect(viewModel.result) {
             viewModel.result.collect { result ->
                 isShowingProgress = false
@@ -241,10 +246,12 @@ fun SignUpScreen(
                             popUpTo(Navigation.AUTH_ROUTE)
                         }
                     }
+
                     is ResultOfRequest.Error -> {
                         isShowingAlertDialog = true
                         errorMessage = result.errorMessage
                     }
+
                     else -> {}
                 }
             }

@@ -4,13 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.pokrovskii.queue.core.ResultOfRequest
-import ru.pokrovskii.queue.data.api.QueueApi
 import ru.pokrovskii.queue.data.api.UserApi
 import ru.pokrovskii.queue.domain.DTO.QueueDTO
 import ru.pokrovskii.queue.domain.model.User

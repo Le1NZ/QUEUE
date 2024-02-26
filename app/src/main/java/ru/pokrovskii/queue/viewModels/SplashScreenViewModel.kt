@@ -3,7 +3,6 @@ package ru.pokrovskii.queue.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,10 +28,8 @@ class SplashScreenViewModel @Inject constructor(
         viewModelScope.launch {
             if (auth.currentUser != null) {
                 val resultOfRequest = userApi.getUser(auth.currentUser!!.uid)
-                launch {
-                    if (resultOfRequest is ResultOfRequest.Success) {
-                        userDao.updateUser(resultOfRequest.result!!)
-                    }
+                if (resultOfRequest is ResultOfRequest.Success) {
+                    userDao.updateUser(resultOfRequest.result!!)
                 }
                 _result.update { resultOfRequest }
             } else {

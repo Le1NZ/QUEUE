@@ -1,5 +1,6 @@
 package ru.pokrovskii.queue.ui.screens
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
@@ -12,11 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import ru.pokrovskii.queue.R
 import ru.pokrovskii.queue.core.ResultOfRequest
@@ -32,24 +30,26 @@ fun SplashScreen(
     mainScreenViewModel: MainScreenViewModel,
 ) {
     val scale = remember {
-        androidx.compose.animation.core.Animatable(0f)
+        Animatable(0f)
     }
 
     LaunchedEffect(Unit) {
-        viewModel.starting()
-
         val job = launch(Dispatchers.Main) {
             scale.animateTo(
-                targetValue = 0.7f,
+                targetValue = 1.7f,
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioHighBouncy,
-                    stiffness = Spring.StiffnessMediumLow
+                    stiffness = Spring.StiffnessLow
                 )
             )
         }
 
+        launch(Dispatchers.IO) {
+            viewModel.starting()
+        }
+
+        job.join()
         viewModel.result.collect { result ->
-            job.join()
             navigationToNextScreen(result, navController)
         }
     }

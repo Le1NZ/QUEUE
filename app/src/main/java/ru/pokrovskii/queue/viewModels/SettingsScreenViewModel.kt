@@ -13,21 +13,17 @@ import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.data.api.QueueApi
 import ru.pokrovskii.queue.data.api.UserApi
 import ru.pokrovskii.queue.data.dataBase.UserDAO
-import ru.pokrovskii.queue.domain.model.User
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsScreenViewModel @Inject constructor(
     private val userDao: UserDAO,
     private val userApi: UserApi,
-    private val auth: FirebaseAuth,
     private val queueApi: QueueApi,
 ) : ViewModel() {
 
     private val _newUserName: MutableStateFlow<String> = MutableStateFlow("")
     val newUserName: StateFlow<String> = _newUserName
-
-    private val _currUser: MutableStateFlow<User?> = MutableStateFlow(null)
 
     private val _resultOfUpdateUserName: MutableStateFlow<ResultOfRequest<Unit?>?> =
         MutableStateFlow(null)
@@ -39,8 +35,8 @@ class SettingsScreenViewModel @Inject constructor(
 
     fun getUserName() {
         viewModelScope.launch {
-            _currUser.value = userDao.getCurrUser()
-            _newUserName.value = _currUser.value!!.username
+            val currUser = userDao.getCurrUser()
+            _newUserName.value = currUser!!.username
         }
     }
 
@@ -48,22 +44,18 @@ class SettingsScreenViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             // Creating new instance of User class with new username and the same queues
             val oldUser = userDao.getCurrUser()!!
-            val newUser = User(
-                id = auth.currentUser!!.uid,
-                username = _newUserName.value,
-                queues = oldUser.queues
-            )
+            oldUser.username = _newUserName.value
 
-            val resultOfRequest = userApi.setUser(newUser, auth.currentUser!!.uid)
             _resultOfUpdateUserName.update { null }
+            val resultOfRequest = userApi.setUser(oldUser, oldUser.id)
             if (resultOfRequest is ResultOfRequest.Success) {
                 // updating user in DB
                 launch {
-                    userDao.updateUser(newUser)
+                    userDao.updateUser(oldUser)
                 }
                 // updating name in queues
                 launch {
-                    queueApi.updateNameOfUserInQueues(oldUser, _newUserName.value)
+                    queueApi.updateNameOfUserInQueues(oldUser, oldUser.username)
                 }
             }
             _resultOfUpdateUserName.update { resultOfRequest }
