@@ -56,7 +56,12 @@ fun AddQueueScreen(
         mutableStateOf(false)
     }
 
-    var isNameOfQueueIsEmpty by remember {
+    var isNameOfAddQueueIsEmpty by remember {
+        mutableStateOf(true)
+    }
+
+
+    var isNameOfCreateQueueIsEmpty by remember {
         mutableStateOf(true)
     }
 
@@ -138,16 +143,16 @@ fun AddQueueScreen(
                         value = addQueueName,
                         singleLine = true,
                         maxLines = 1,
-                        isError = isNameOfQueueIsEmpty,
+                        isError = isNameOfAddQueueIsEmpty,
                         onValueChange = {
                             viewModel.updateNameOfAddQueue(it)
-                            isNameOfQueueIsEmpty = it.isEmpty()
+                            isNameOfAddQueueIsEmpty = it.isEmpty()
                         },
                         label = {
                             Text(stringResource(id = R.string.enter_code))
                         },
                         supportingText = {
-                            if (!isNameOfQueueIsEmpty) {
+                            if (!isNameOfAddQueueIsEmpty) {
                                 Text("")
                             } else {
                                 Text(stringResource(id = R.string.field_should_be_not_empty))
@@ -163,8 +168,13 @@ fun AddQueueScreen(
                 ) {
                     Button(
                         onClick = {
-                            isShowingProgress = true
-                            viewModel.addQueue()
+                            if (!isNameOfAddQueueIsEmpty) {
+                                isShowingProgress = true
+                                viewModel.addQueue()
+                            } else {
+                                errorMessage = "The field is empty"
+                                isShowingAlertDialog = true
+                            }
                         },
                         modifier = Modifier.fillMaxWidth(),
 
@@ -188,18 +198,18 @@ fun AddQueueScreen(
                             .fillMaxWidth()
                             .padding(top = 16.dp),
                         value = newQueueName,
-                        isError = isNameOfQueueIsEmpty,
+                        isError = isNameOfCreateQueueIsEmpty,
                         maxLines = 1,
                         singleLine = true,
                         onValueChange = {
                             viewModel.updateNameOfNewQueue(it)
-                            isNameOfQueueIsEmpty = it.isEmpty()
+                            isNameOfCreateQueueIsEmpty = it.isEmpty()
                         },
                         label = {
                             Text(stringResource(id = R.string.enter_name))
                         },
                         supportingText = {
-                            if (!isNameOfQueueIsEmpty) {
+                            if (!isNameOfCreateQueueIsEmpty) {
                                 Text("")
                             } else {
                                 Text(stringResource(id = R.string.field_should_be_not_empty))
@@ -231,8 +241,13 @@ fun AddQueueScreen(
                 ) {
                     Button(
                         onClick = {
-                            isShowingProgress = true
-                            viewModel.createQueue(switchAdmins)
+                            if (!isNameOfCreateQueueIsEmpty) {
+                                isShowingProgress = true
+                                viewModel.createQueue(switchAdmins)
+                            } else {
+                                errorMessage = "The field is empty"
+                                isShowingAlertDialog = true
+                            }
                         },
                         modifier = Modifier.fillMaxWidth(),
 
