@@ -35,4 +35,5 @@
     <string name="is_all_users_are_admin">Все пользователи администраторы</string>
     <string name="make_admin">Сделать администратором</string>
     <string name="kick_out">Убрать из очереди</string>
+    <string name="you_are_the_next">Вы следующий</string>
 </resources>

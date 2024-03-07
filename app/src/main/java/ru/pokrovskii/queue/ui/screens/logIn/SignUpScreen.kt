@@ -242,7 +242,7 @@ fun SignUpScreen(
                 when (result) {
                     is ResultOfRequest.Success -> {
                         navController.navigate(Navigation.MAIN_ROUTE) {
-                            mainScreenViewModel.starting()
+                            mainScreenViewModel.starting(context)
                             popUpTo(Navigation.AUTH_ROUTE)
                         }
                     }

@@ -197,7 +197,7 @@ fun SignInScreen(
                     is ResultOfRequest.Success -> {
                         navController.navigate(Navigation.MAIN_ROUTE) {
                             popUpTo(Navigation.AUTH_ROUTE)
-                            mainScreenViewModel.starting()
+                            mainScreenViewModel.starting(context)
                         }
                     }
 

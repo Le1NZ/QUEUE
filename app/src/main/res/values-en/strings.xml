@@ -33,4 +33,5 @@
     <string name="is_all_users_are_admin">Is all users are admins</string>
     <string name="make_admin">Make admin</string>
     <string name="kick_out">Delete from queue</string>
+    <string name="you_are_the_next">You are the next</string>
 </resources>
