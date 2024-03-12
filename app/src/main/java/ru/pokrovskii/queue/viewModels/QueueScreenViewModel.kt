@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -51,7 +52,7 @@ class QueueScreenViewModel @Inject constructor(
 
 
     fun starting(id: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _resultOfStarting.update { null }
             queueApi.startListeningQueue(id) { queue: Queue? ->
                 _resultOfStarting.value = ResultOfRequest.Success(queue!!)
@@ -60,7 +61,7 @@ class QueueScreenViewModel @Inject constructor(
     }
 
     fun deleteQueue(currQueue: Queue) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val currUser = userDAO.getCurrUser()!!
             var resultOfRequest1: ResultOfRequest<Unit> = ResultOfRequest.Loading
             var resultOfRequest2: ResultOfRequest<Unit> = ResultOfRequest.Loading
@@ -95,7 +96,7 @@ class QueueScreenViewModel @Inject constructor(
     }
 
     fun theNextUser(id: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _resultOfNextOrReturn.update { null }
 
             val resultOfRequest: ResultOfRequest<Unit> = queueApi.theNext(id)
@@ -104,7 +105,7 @@ class QueueScreenViewModel @Inject constructor(
     }
 
     fun returnToQueue(queue: Queue) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _resultOfNextOrReturn.update { null }
             val currUser = userApi.getUser(auth.currentUser!!.uid)
             if (currUser is ResultOfRequest.Success) {
@@ -124,7 +125,7 @@ class QueueScreenViewModel @Inject constructor(
     }
 
     fun isAdmin(queue: Queue, userId: String = auth.currentUser!!.uid) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if (queue.allUsersAreAdmins) {
                 _isCurrentUserAdmin.value = true
                 return@launch
@@ -145,7 +146,7 @@ class QueueScreenViewModel @Inject constructor(
     }
 
     fun kickOutUser(currQueue: Queue, currUser: UserDTO) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _resultOfKickOut.update { null }
 
             val resultOfRequest = queueApi.deleteUserFromQueue(currUser, currQueue.id)
@@ -154,7 +155,7 @@ class QueueScreenViewModel @Inject constructor(
     }
 
     fun makeUserAdmin(index: Int, queue: Queue, userId: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _resultOfMakingAdmin.update { null }
 
             val result = userApi.getUser(userId)

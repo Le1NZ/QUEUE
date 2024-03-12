@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -46,7 +47,7 @@ class AddingQueueScreenViewModel @Inject constructor(
     }
 
     fun createQueue(switchingAdmins: Boolean) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val currUser = userDAO.getCurrUser()
             var newQueue =
                 Queue(
@@ -72,7 +73,7 @@ class AddingQueueScreenViewModel @Inject constructor(
     }
 
     fun addQueue() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val currUser = userDAO.getCurrUser()
             // If user is already have this queue
             if (checkForAlreadyAddedQueue(currUser!!.queues, _nameOfAddQueue.value)) {

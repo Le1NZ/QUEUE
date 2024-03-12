@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -25,7 +26,7 @@ class SplashScreenViewModel @Inject constructor(
     val result: StateFlow<ResultOfRequest<User?>?> = _result
 
     fun starting() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if (auth.currentUser != null) {
                 val resultOfRequest = userApi.getUser(auth.currentUser!!.uid)
                 if (resultOfRequest is ResultOfRequest.Success) {

@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -33,7 +34,7 @@ class MainScreenViewModel @Inject constructor(
         if (_resultOfStarting.value == null) {
             val intent = Intent(context, NotificationService::class.java)
             context.startService(intent)
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.IO) {
                 userApi.startListeningQueues(auth.currentUser!!.uid) { user: User? ->
                     _resultOfStarting.update { ResultOfRequest.Success(user!!.queues) }
                 }
