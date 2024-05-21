@@ -34,9 +34,9 @@ class AddingQueueScreenViewModel @Inject constructor(
     private val _nameOfAddQueue: MutableStateFlow<String> = MutableStateFlow("")
     val nameOfAddQueue: StateFlow<String> = _nameOfAddQueue
 
-    private val _resultOfCreatingQueue: MutableStateFlow<ResultOfRequest<Queue>> =
+    private val _resultOfCreatingQueue: MutableStateFlow<ResultOfRequest<Queue>?> =
         MutableStateFlow(ResultOfRequest.Loading)
-    val resultOfCreateQueue: StateFlow<ResultOfRequest<Queue>> = _resultOfCreatingQueue
+    val resultOfCreateQueue: StateFlow<ResultOfRequest<Queue>?> = _resultOfCreatingQueue
 
     fun updateNameOfNewQueue(nameOfQueue: String) {
         _nameOfNewQueue.update { nameOfQueue }
@@ -48,6 +48,7 @@ class AddingQueueScreenViewModel @Inject constructor(
 
     fun createQueue(switchingAdmins: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
+            _resultOfCreatingQueue.update { null }
             val currUser = userDAO.getCurrUser()
             var newQueue =
                 Queue(
@@ -80,6 +81,7 @@ class AddingQueueScreenViewModel @Inject constructor(
                 _resultOfCreatingQueue.update { ResultOfRequest.Error("You are already in this queue") }
                 return@launch
             }
+            _resultOfCreatingQueue.update { null }
             val resultOfGettingQueue = queueApi.getQueue(_nameOfAddQueue.value)
             if (resultOfGettingQueue is ResultOfRequest.Success) {
                 val newQueue = resultOfGettingQueue.result

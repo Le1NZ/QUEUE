@@ -1,6 +1,7 @@
 package ru.pokrovskii.queue.ui.screens.logIn
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -44,8 +44,6 @@ import ru.pokrovskii.queue.ui.screens.ShowProgressBar
 import ru.pokrovskii.queue.viewModels.MainScreenViewModel
 import ru.pokrovskii.queue.viewModels.SignInScreenViewModel
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignInScreen(
     navController: NavController,
@@ -75,6 +73,7 @@ fun SignInScreen(
 
     Box(
         modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
             .fillMaxSize()
             .padding(16.dp)
     ) {
@@ -87,7 +86,8 @@ fun SignInScreen(
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                lineHeight = 32.sp
+                lineHeight = 32.sp,
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
@@ -163,7 +163,10 @@ fun SignInScreen(
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = stringResource(id = R.string.already_havent_account))
+            Text(
+                text = stringResource(id = R.string.already_havent_account),
+                color = MaterialTheme.colorScheme.onBackground,
+            )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = stringResource(id = R.string.sign_up),

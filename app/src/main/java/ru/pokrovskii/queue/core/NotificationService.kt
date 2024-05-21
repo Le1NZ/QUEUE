@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
@@ -43,10 +44,13 @@ class NotificationService : Service() {
         val coroutineScope = CoroutineScope(EmptyCoroutineContext)
         coroutineScope.launch {
             val currUser = userDAO.getCurrUser()
-            for (queue in currUser!!.queues) {
-                queueApi.startListeningQueue(queue.id) { queue ->
-                    if (queue != null && queue.users.size >= 2 && auth.currentUser!!.uid == queue.users[1].id) {
-                        createNotification(queue.name)
+            Log.d("notify", currUser.toString())
+            currUser?.let { user ->
+                for (queue in user.queues) {
+                    queueApi.startListeningQueue(queue.id) { queue ->
+                        if (queue != null && queue.users.size >= 2 && auth.currentUser!!.uid == queue.users[1].id) {
+                            createNotification(queue.name)
+                        }
                     }
                 }
             }
@@ -91,7 +95,7 @@ class NotificationService : Service() {
     private fun createAppOpenIntent(context: Context): PendingIntent {
         val intent = Intent(context, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_MUTABLE)
     }
 
 }

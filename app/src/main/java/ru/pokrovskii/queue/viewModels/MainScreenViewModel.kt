@@ -2,8 +2,7 @@ package ru.pokrovskii.queue.viewModels
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -11,7 +10,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.pokrovskii.queue.core.NotificationService
 import ru.pokrovskii.queue.core.ResultOfRequest
@@ -33,10 +31,12 @@ class MainScreenViewModel @Inject constructor(
     fun starting(context: Context) {
         if (_resultOfStarting.value == null) {
             val intent = Intent(context, NotificationService::class.java)
+            Log.d("notify", "before service start")
             context.startService(intent)
+            Log.d("notify", "after service start")
             viewModelScope.launch(Dispatchers.IO) {
                 userApi.startListeningQueues(auth.currentUser!!.uid) { user: User? ->
-                    _resultOfStarting.update { ResultOfRequest.Success(user!!.queues) }
+                    _resultOfStarting.value = ResultOfRequest.Success(user!!.queues)
                 }
             }
         }

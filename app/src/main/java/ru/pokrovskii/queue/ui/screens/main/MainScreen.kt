@@ -1,8 +1,5 @@
 package ru.pokrovskii.queue.ui.screens.main
 
-import android.content.Intent
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import ru.pokrovskii.queue.R
-import ru.pokrovskii.queue.core.NotificationService
 import ru.pokrovskii.queue.core.ResultOfRequest
 import ru.pokrovskii.queue.domain.DTO.QueueDTO
 import ru.pokrovskii.queue.ui.screens.Screen
@@ -45,7 +40,6 @@ import ru.pokrovskii.queue.ui.screens.ShowProgressBar
 import ru.pokrovskii.queue.viewModels.MainScreenViewModel
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -151,7 +145,6 @@ fun HomeScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun QueueCard(queue: QueueDTO, navController: NavController) {
     ElevatedCard(

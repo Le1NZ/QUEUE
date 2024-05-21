@@ -1,11 +1,8 @@
 package ru.pokrovskii.queue.ui
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
@@ -37,6 +34,7 @@ object Navigation {
     const val AUTH_ROUTE = "authRoute"
     const val MAIN_ROUTE = "mainRoute"
     const val SPLASH_ROUTE = "splashRoute"
+    private const val TIME_TO_ANIMATED_NAVIGATION = 500
 
     @Composable
     fun Navigation(
@@ -48,10 +46,10 @@ object Navigation {
         NavHost(
             navController = navController,
             startDestination = SPLASH_ROUTE,
-            enterTransition = { slideInHorizontally(initialOffsetX = { 300 }) + fadeIn() },
-            exitTransition = { ExitTransition.None },
-            popEnterTransition = { EnterTransition.None },
-            popExitTransition = { slideOutHorizontally(targetOffsetX = { 300 }) + fadeOut() },
+            enterTransition = { fadeIn(animationSpec = tween(TIME_TO_ANIMATED_NAVIGATION)) },
+            exitTransition = { fadeOut(animationSpec = tween(TIME_TO_ANIMATED_NAVIGATION)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(TIME_TO_ANIMATED_NAVIGATION)) },
+            popExitTransition = { fadeOut(animationSpec = tween(TIME_TO_ANIMATED_NAVIGATION)) },
         ) {
             navigation(
                 startDestination = Screen.SplashScreen.name,
