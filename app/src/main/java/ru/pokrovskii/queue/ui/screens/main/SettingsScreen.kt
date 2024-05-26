@@ -153,25 +153,24 @@ fun SettingsScreen(
             isShowingProgress = false
         }
 
-        LaunchedEffect(viewModel.resultOfUpdateUserName) {
-            viewModel.resultOfUpdateUserName.collect { result ->
-                isShowingProgress = false
-                when (result) {
-                    is ResultOfRequest.Success -> {
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.success_update_username),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-
-                    is ResultOfRequest.Error -> {
-                        errorMessage = result.errorMessage
-                        isShowingAlertDialog = true
-                    }
-
-                    else -> {}
+        val resultOfUpdateUserName = viewModel.resultOfUpdateUserName.collectAsState().value
+        LaunchedEffect(resultOfUpdateUserName) {
+            isShowingProgress = false
+            when (resultOfUpdateUserName) {
+                is ResultOfRequest.Success -> {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.success_update_username),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
+
+                is ResultOfRequest.Error -> {
+                    errorMessage = resultOfUpdateUserName.errorMessage
+                    isShowingAlertDialog = true
+                }
+
+                else -> {}
             }
         }
 

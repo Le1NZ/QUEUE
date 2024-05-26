@@ -20,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -118,22 +119,21 @@ fun HomeScreen(
             }
         }
 
-        LaunchedEffect(viewModel.resultOfStarting) {
-            viewModel.resultOfStarting.collect { result ->
-                when (result) {
-                    is ResultOfRequest.Success -> {
-                        isShowingProgress = false
-                        queues = result.result
-                    }
-
-                    is ResultOfRequest.Error -> {
-                        isShowingProgress = false
-                        errorMessage = result.errorMessage
-                        isShowingAlertDialog = true
-                    }
-
-                    else -> {}
+        val resultOfStarting = viewModel.resultOfStarting.collectAsState().value
+        LaunchedEffect(resultOfStarting) {
+            when (resultOfStarting) {
+                is ResultOfRequest.Success -> {
+                    isShowingProgress = false
+                    queues = resultOfStarting.result
                 }
+
+                is ResultOfRequest.Error -> {
+                    isShowingProgress = false
+                    errorMessage = resultOfStarting.errorMessage
+                    isShowingAlertDialog = true
+                }
+
+                else -> {}
             }
         }
 

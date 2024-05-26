@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,15 +57,14 @@ fun SplashScreen(
         }
     }
 
-    LaunchedEffect(viewModel.result) {
-        viewModel.result.collect { result ->
-            when (result) {
-                is ResultOfRequest.Success -> {
-                    mainScreenViewModel.starting(context)
-                }
-
-                else -> {}
+    val result = viewModel.result.collectAsState().value
+    LaunchedEffect(result) {
+        when (result) {
+            is ResultOfRequest.Success -> {
+                mainScreenViewModel.starting(context)
             }
+
+            else -> {}
         }
     }
 

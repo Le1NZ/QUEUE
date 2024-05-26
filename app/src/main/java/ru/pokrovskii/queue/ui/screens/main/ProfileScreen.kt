@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -153,23 +154,22 @@ fun ProfileScreen(
                 }
             }
 
-            LaunchedEffect(viewModel.resultOfLogOut) {
-                viewModel.resultOfLogOut.collect { result ->
-                    isShowingProgress = false
-                    when (result) {
-                        is ResultOfRequest.Error -> {
-                            errorMessage = result.errorMessage
-                            isShowingAlertDialog = true
-                        }
-
-                        is ResultOfRequest.Success -> {
-                            navController.navigate(Navigation.AUTH_ROUTE) {
-                                popUpTo(Navigation.MAIN_ROUTE)
-                            }
-                        }
-
-                        else -> {}
+            val resultOfLogOut = viewModel.resultOfLogOut.collectAsState().value
+            LaunchedEffect(resultOfLogOut) {
+                isShowingProgress = false
+                when (resultOfLogOut) {
+                    is ResultOfRequest.Error -> {
+                        errorMessage = resultOfLogOut.errorMessage
+                        isShowingAlertDialog = true
                     }
+
+                    is ResultOfRequest.Success -> {
+                        navController.navigate(Navigation.AUTH_ROUTE) {
+                            popUpTo(Navigation.MAIN_ROUTE)
+                        }
+                    }
+
+                    else -> {}
                 }
             }
         }

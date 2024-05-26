@@ -273,22 +273,21 @@ fun AddQueueScreen(
                 )
             }
 
-            LaunchedEffect(viewModel.resultOfCreateQueue) {
-                viewModel.resultOfCreateQueue.collect { result ->
-                    isShowingProgress = false
-                    when (result) {
-                        is ResultOfRequest.Success -> {
-                            // Sharing to window of queue info about its id
-                            navController.navigate(Screen.QueueScreen.name + "/${result.result.id}")
-                        }
-
-                        is ResultOfRequest.Error -> {
-                            errorMessage = result.errorMessage
-                            isShowingAlertDialog = true
-                        }
-
-                        else -> {}
+            val resultOfCreateQueue = viewModel.resultOfCreateQueue.collectAsState().value
+            LaunchedEffect(resultOfCreateQueue) {
+                isShowingProgress = false
+                when (resultOfCreateQueue) {
+                    is ResultOfRequest.Success -> {
+                        // Sharing to window of queue info about its id
+                        navController.navigate(Screen.QueueScreen.name + "/${resultOfCreateQueue.result.id}")
                     }
+
+                    is ResultOfRequest.Error -> {
+                        errorMessage = resultOfCreateQueue.errorMessage
+                        isShowingAlertDialog = true
+                    }
+
+                    else -> {}
                 }
             }
         }

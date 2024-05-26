@@ -193,24 +193,23 @@ fun SignInScreen(
             )
         }
 
-        LaunchedEffect(viewModel.result) {
-            viewModel.result.collect { result ->
-                isShowingProgress = false
-                when (result) {
-                    is ResultOfRequest.Success -> {
-                        navController.navigate(Navigation.MAIN_ROUTE) {
-                            popUpTo(Navigation.AUTH_ROUTE)
-                            mainScreenViewModel.starting(context)
-                        }
+        val resultOfSignIn = viewModel.result.collectAsState().value
+        LaunchedEffect(resultOfSignIn) {
+            isShowingProgress = false
+            when (resultOfSignIn) {
+                is ResultOfRequest.Success -> {
+                    navController.navigate(Navigation.MAIN_ROUTE) {
+                        popUpTo(Navigation.AUTH_ROUTE)
+                        mainScreenViewModel.starting(context)
                     }
-
-                    is ResultOfRequest.Error -> {
-                        isShowingAlertDialog = true
-                        errorMessage = result.errorMessage
-                    }
-
-                    else -> {}
                 }
+
+                is ResultOfRequest.Error -> {
+                    isShowingAlertDialog = true
+                    errorMessage = resultOfSignIn.errorMessage
+                }
+
+                else -> {}
             }
         }
     }

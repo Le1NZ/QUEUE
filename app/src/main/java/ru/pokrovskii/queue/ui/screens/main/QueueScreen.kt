@@ -354,21 +354,19 @@ private fun UserCard(
         }
     }
 
-    LaunchedEffect(viewModel.resultOfKickOut) {
-        viewModel.resultOfKickOut.collect { result ->
-            if (result is ResultOfRequest.Success || result is ResultOfRequest.Error) {
-                isShowingProgress = false
-                expanded = false
-            }
+    val resultOfKickOut = viewModel.resultOfKickOut.collectAsState().value
+    LaunchedEffect(resultOfKickOut) {
+        if (resultOfKickOut is ResultOfRequest.Success || resultOfKickOut is ResultOfRequest.Error) {
+            isShowingProgress = false
+            expanded = false
         }
     }
 
-    LaunchedEffect(viewModel.resultOfMakingAdmin) {
-        viewModel.resultOfMakingAdmin.collect { result ->
-            if (result is ResultOfRequest.Success || result is ResultOfRequest.Error) {
-                isShowingProgress = false
-                expanded = false
-            }
+    val resultOfMakingAdmin = viewModel.resultOfKickOut.collectAsState().value
+    LaunchedEffect(resultOfMakingAdmin) {
+        if (resultOfMakingAdmin is ResultOfRequest.Success || resultOfMakingAdmin is ResultOfRequest.Error) {
+            isShowingProgress = false
+            expanded = false
         }
     }
 }

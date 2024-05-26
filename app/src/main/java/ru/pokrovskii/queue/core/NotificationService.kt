@@ -47,9 +47,9 @@ class NotificationService : Service() {
             Log.d("notify", currUser.toString())
             currUser?.let { user ->
                 for (queue in user.queues) {
-                    queueApi.startListeningQueue(queue.id) { queue ->
-                        if (queue != null && queue.users.size >= 2 && auth.currentUser!!.uid == queue.users[1].id) {
-                            createNotification(queue.name)
+                    queueApi.startListeningQueue(queue.id) { currQueue ->
+                        if (currQueue != null && currQueue.users.size >= 2 && auth.currentUser!!.uid == currQueue.users[1].id) {
+                            createNotification(currQueue.name)
                         }
                     }
                 }
@@ -95,7 +95,12 @@ class NotificationService : Service() {
     private fun createAppOpenIntent(context: Context): PendingIntent {
         val intent = Intent(context, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_MUTABLE)
+        return PendingIntent.getActivity(
+            context, 
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 
 }
